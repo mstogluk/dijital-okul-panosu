@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\OkulPanosu.Core\OkulPanosu.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Resource: XAML "Icon=/Assets/AppIcon.ico" pencere ikonları için pack kaynağı olarak gömülür. -->
+    <Resource Include="Assets\AppIcon.ico" />
+    <!-- None + CopyToOutputDirectory: TrayIconService, tepsi ikonu için doğru boyuttaki (16x16) kareyi
+         net seçebilsin diye AYNI dosya ayrıca çıktı klasörüne DÜZ DOSYA olarak da kopyalanır —
+         ExtractAssociatedIcon tek (genelde 32x32) boyut döndürüp Windows'un onu 16x16'ya küçültmesine
+         (bulanıklaşmasına) yol açtığı için bu ayrı kopya gerekli oldu. -->
+    <None Include="Assets\AppIcon.ico" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Uygulama içi Yardım sayfası (HelpView, WebBrowser kontrolü) bu dosyayı doğrudan diskten açar. -->
+    <None Include="Assets\Help\kilavuz.html" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!--
+    UseWPF + UseWindowsForms birlikte açıkken SDK, System.Windows.Forms'u örtük global using
+    olarak ekliyor — bu da UserControl/KeyEventArgs gibi WPF ile aynı isimli tiplerde belirsizlik
+    hatasına yol açıyor. Screen.AllScreens (çoklu monitör seçimi) her yerde tam nitelikli adla
+    kullanıldığından bu örtük using'i güvenle kaldırabiliriz.
+  -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+</Project>

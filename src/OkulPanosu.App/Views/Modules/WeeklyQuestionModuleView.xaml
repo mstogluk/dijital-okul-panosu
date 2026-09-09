@@ -1,0 +1,24 @@
+<UserControl x:Class="OkulPanosu.App.Views.Modules.WeeklyQuestionModuleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Padding="14">
+        <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="🧠 Haftanın Beyin Egzersizi" Style="{StaticResource HeadingStyle}" HorizontalAlignment="Center" Margin="0,0,0,10" />
+
+            <TextBlock x:Name="EmptyText" Style="{StaticResource MutedTextStyle}" FontSize="16"
+                       HorizontalAlignment="Center" Visibility="Collapsed" />
+
+            <StackPanel x:Name="ContentPanel">
+                <TextBlock x:Name="QuestionText" FontSize="14" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,6" />
+                <TextBlock x:Name="AnswerText" Style="{StaticResource MutedTextStyle}" FontSize="12" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,14" />
+
+                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush1}" Margin="0,0,0,10" />
+
+                <TextBlock Text="Haftanın Kelimesi (İngilizce)" Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                <TextBlock x:Name="WordText" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+                <TextBlock x:Name="MeaningText" FontSize="13" HorizontalAlignment="Center" Margin="0,2,0,6" />
+                <TextBlock x:Name="ExampleText" FontStyle="Italic" Style="{StaticResource MutedTextStyle}" FontSize="12" TextWrapping="Wrap" TextAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

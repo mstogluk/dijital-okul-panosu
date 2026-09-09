@@ -1,0 +1,11 @@
+<UserControl x:Class="OkulPanosu.App.Views.Modules.TickerBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="48" ClipToBounds="True">
+    <Border x:Name="RootBorder">
+        <Canvas x:Name="TickerCanvas" SizeChanged="TickerCanvas_SizeChanged">
+            <TextBlock x:Name="TickerText" FontSize="20" FontWeight="SemiBold"
+                       Canvas.Top="12" VerticalAlignment="Center" />
+        </Canvas>
+    </Border>
+</UserControl>

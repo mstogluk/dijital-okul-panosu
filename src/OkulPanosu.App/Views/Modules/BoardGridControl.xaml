@@ -1,0 +1,22 @@
+<UserControl x:Class="OkulPanosu.App.Views.Modules.BoardGridControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:OkulPanosu.App.Views.Modules">
+    <Grid Background="{DynamicResource BoardCanvasBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border x:Name="SchoolNameHeader" Grid.Row="0" Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush1}" BorderThickness="0,0,0,1" Padding="16,12"
+                Visibility="Collapsed">
+            <TextBlock x:Name="SchoolNameText" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"
+                       HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        </Border>
+
+        <Grid x:Name="RootGrid" Grid.Row="1" Margin="8" />
+        <local:TickerBar x:Name="Ticker" Grid.Row="2" />
+    </Grid>
+</UserControl>

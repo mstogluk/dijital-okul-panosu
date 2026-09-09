@@ -1,0 +1,21 @@
+<Window x:Class="OkulPanosu.App.Views.AppMessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Okul Panosu" Icon="/Assets/AppIcon.ico" Width="380" SizeToContent="Height" MinHeight="150"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False" Background="{StaticResource BgPrimaryBrush}">
+    <Grid Margin="24" Background="{StaticResource BgPrimaryBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" x:Name="TitleText" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,0,12" />
+        <TextBlock Grid.Row="1" x:Name="MessageText" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Top" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="NoButton" Content="Hayır" Style="{StaticResource SecondaryButtonStyle}" Width="90" Margin="0,0,8,0" Click="No_Click" Visibility="Collapsed" />
+            <Button x:Name="YesButton" Content="Tamam" Style="{StaticResource PrimaryButtonStyle}" Width="90" Click="Yes_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

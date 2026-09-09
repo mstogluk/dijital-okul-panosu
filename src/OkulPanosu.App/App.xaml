@@ -1,0 +1,15 @@
+<Application x:Class="OkulPanosu.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:OkulPanosu.App.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/Base.xaml" />
+                <ResourceDictionary Source="Themes/Accent.Blue.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

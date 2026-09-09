@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Okul Panosu — Kullanım Kılavuzu</title>
+<style>
+  :root {
+    --bg: #0d1424;
+    --panel: #141d33;
+    --panel-2: #101830;
+    --border: #26324d;
+    --ink: #e7ebf3;
+    --ink-muted: #8b96ad;
+    --accent: #4c8dff;
+    --accent-deep: #1e3a8a;
+    --good: #34c77b;
+    --good-bg: #0f2a1e;
+    --good-border: #1e5c3f;
+    --warn: #e0a545;
+    --warn-bg: #2a1f0f;
+    --warn-border: #5c471e;
+    --shadow: 0 12px 30px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.62;
+  }
+  ::selection { background: var(--accent); color: #fff; }
+
+  h1, h2, h3 {
+    font-family: Georgia, "Palatino Linotype", Palatino, serif;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  a { color: var(--accent); }
+
+  .shell {
+    display: -ms-flexbox;
+    display: flex;
+    max-width: 1180px;
+    margin: 0 auto;
+    height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  nav.rail {
+    width: 262px;
+    -ms-flex: 0 0 262px;
+    flex: 0 0 262px;
+    padding: 34px 20px 40px 28px;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .brand {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 26px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-badge {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: -ms-linear-gradient(135deg, var(--accent-deep), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    font-size: 17px;
+    -ms-flex: none;
+    flex: none;
+  }
+  .brand-text { font-family: Georgia, serif; font-size: 15px; font-weight: 600; line-height: 1.25; }
+  .brand-text small { display: block; font-family: "Segoe UI", sans-serif; font-weight: 400; color: var(--ink-muted); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 2px; }
+
+  .rail-group { margin-bottom: 4px; }
+  .rail-label {
+    font-size: 10.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 20px 0 8px 10px;
+    background: none;
+    border: none;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .rail-label:hover { color: var(--accent); }
+  .rail a.item, button.item {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    gap: 9px;
+    padding: 6px 10px;
+    border-radius: 7px;
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: 13.3px;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .rail .ico { font-size: 13px; -ms-flex: none; flex: none; width: 16px; text-align: center; }
+  .rail .item:hover { background: var(--panel-2); color: var(--ink); }
+  .rail .item.active { background: var(--panel); color: var(--accent); font-weight: 600; box-shadow: inset 2px 0 0 var(--accent); }
+
+  /* ---------- Main content ---------- */
+  main {
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    overflow-y: auto;
+    padding: 46px 48px 100px 48px;
+    border-left: 1px solid var(--border);
+  }
+  .content { max-width: 700px; }
+
+  .crumb {
+    color: var(--ink-muted);
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  header.hero { margin-bottom: 10px; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    padding: 4px 11px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+  h1.title { font-size: 34px; margin: 0 0 10px 0; letter-spacing: -0.01em; }
+  .lede { color: var(--ink-muted); font-size: 16px; max-width: 62ch; margin: 0; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page > h2 {
+    font-size: 25px;
+    margin: 0 0 18px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page > .section-intro { color: var(--ink-muted); margin: -6px 0 18px 0; }
+
+  h3 { font-size: 16.5px; margin: 26px 0 8px 0; }
+
+  p { margin: 9px 0; }
+  ul, ol { margin: 9px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  code {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 1.5px 6px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+  }
+  kbd {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    color: var(--ink);
+    padding: 1.5px 7px;
+    border-radius: 5px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+  }
+
+  .callout {
+    border-radius: 10px;
+    padding: 13px 18px;
+    margin: 16px 0;
+    border: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .callout.tip { background: var(--good-bg); border-color: var(--good-border); }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn-border); }
+  .callout .label { font-weight: 700; font-size: 12px; letter-spacing: 0.03em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .callout.tip .label { color: var(--good); }
+  .callout.warn .label { color: var(--warn); }
+  .callout p { margin: 0; }
+
+  .faq-item {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 12px 0;
+  }
+  .faq-item .q { font-weight: 600; margin: 0 0 5px 0; }
+  .faq-item .a { color: var(--ink-muted); margin: 0; }
+
+  .module-grid {
+    margin: 20px 0 8px 0;
+  }
+  .module-chip {
+    display: inline-block;
+    *display: inline;
+    zoom: 1;
+    vertical-align: top;
+    width: 160px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 9px;
+    padding: 12px 13px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    margin: 0 8px 8px 0;
+  }
+  .module-chip .ico { font-size: 17px; margin-right: 6px; }
+  .module-chip:hover { border-color: var(--accent); background: var(--panel-2); }
+
+  .prevnext {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    text-align: right;
+  }
+  .prevnext button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--ink-muted);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 12.8px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-left: 8px;
+  }
+  .prevnext button:hover { color: var(--ink); border-color: var(--accent); }
+  .prevnext .prev { float: left; margin-left: 0; }
+
+  footer.page-footer {
+    margin-top: 40px;
+    padding-top: 18px;
+    color: var(--ink-muted);
+    font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="rail">
+    <div class="brand">
+      <div class="brand-badge">&#128421;</div>
+      <div class="brand-text">Okul Panosu<small>Kullanım Kılavuzu</small></div>
+    </div>
+
+    <div class="rail-group">
+      <button class="item" data-page="genel-bakis"><span class="ico">1</span>Genel Bakış</button>
+      <button class="item" data-page="kiosk-yonetim"><span class="ico">2</span>Kiosk/TV &amp; Yönetim</button>
+      <button class="item" data-page="sablonlar"><span class="ico">3</span>Şablonlar &amp; Editör</button>
+      <button class="item" data-page="modul-ayarlari"><span class="ico">4</span>Modül Ayarları</button>
+      <button class="item" data-page="medya"><span class="ico">5</span>Fotoğraf/Video Seçimi</button>
+    </div>
+
+    <button class="rail-label" data-page="modul-genel" style="cursor:pointer;">Modüller</button>
+    <div class="rail-group">
+      <button class="item" data-page="modul-saat"><span class="ico">&#128337;</span>Saat &amp; Tarih</button>
+      <button class="item" data-page="modul-nobetci"><span class="ico">&#128197;</span>Nöbetçi Öğretmen</button>
+      <button class="item" data-page="modul-duyuru"><span class="ico">&#128226;</span>Duyurular</button>
+      <button class="item" data-page="modul-ayin-ogrencisi"><span class="ico">&#127942;</span>Ayın Öğrencisi</button>
+      <button class="item" data-page="modul-video"><span class="ico">&#127916;</span>Yerel Video</button>
+      <button class="item" data-page="modul-tarihte-bugun"><span class="ico">&#128220;</span>Tarihte Bugün</button>
+      <button class="item" data-page="modul-soru"><span class="ico">&#129504;</span>Beyin Egzersizi</button>
+      <button class="item" data-page="modul-galeri"><span class="ico">&#128444;</span>Okulumuzdan Kareler</button>
+      <button class="item" data-page="modul-yemek"><span class="ico">&#127869;</span>Yemek Menüsü</button>
+      <button class="item" data-page="modul-dogum"><span class="ico">&#127874;</span>Doğum Günleri</button>
+      <button class="item" data-page="modul-temiz"><span class="ico">&#129529;</span>Temiz Sınıflar</button>
+      <button class="item" data-page="modul-ders"><span class="ico">&#128276;</span>Ders &amp; Teneffüs</button>
+      <button class="item" data-page="modul-anons-yazi"><span class="ico">&#128227;</span>Büyük Anons (Yazı)</button>
+      <button class="item" data-page="modul-anons-gorsel"><span class="ico">&#128227;</span>Büyük Anons (Görsel)</button>
+    </div>
+
+    <div class="rail-label" style="cursor:default;">Diğer</div>
+    <div class="rail-group">
+      <button class="item" data-page="personel"><span class="ico">&#128101;</span>Personel &amp; Öğretmenler</button>
+      <button class="item" data-page="ayarlar"><span class="ico">&#9881;</span>Ayarlar</button>
+      <button class="item" data-page="ipuclari"><span class="ico">&#10067;</span>İpuçları &amp; SSS</button>
+    </div>
+  </nav>
+
+  <main id="main">
+
+    <div class="page active" id="page-genel-bakis">
+      <header class="hero">
+        <div class="eyebrow">Kullanım Kılavuzu</div>
+        <h1 class="title">Genel Bakış</h1>
+      </header>
+      <div class="content">
+        <p>Okul Panosu, tek bir uygulama (.exe) olarak <strong>iki farklı modda</strong> çalışır:</p>
+        <ul>
+          <li><strong>Kiosk/TV (Yayın) modu</strong> — TV/panoya bağlı bilgisayarda tam ekran çalışır, modülleri sırayla/otomatik gösterir.</li>
+          <li><strong>Yönetim modu</strong> — içerikleri (duyuru, personel, ders programı vb.) düzenlediğiniz idari arayüz.</li>
+        </ul>
+        <p>Her iki mod da aynı <strong>paylaşılan veri klasörünü</strong> (ör. <code>D:\YAYIN</code>) okur/yazar. Yayın
+        PC'si ile Yönetim PC'si farklı bilgisayarlar olsa bile, bu klasör ağ üzerinden paylaşıldığı sürece
+        değişiklikler birkaç saniye içinde otomatik olarak yayına yansır.</p>
+        <div class="callout tip">
+          <span class="label">İpucu</span>
+          <p>Hangi PC'nin hangi modda açılacağı, Ayarlar sayfasındaki (veya ilk kurulum sihirbazındaki) seçime göre
+          belirlenir — makineye özeldir, paylaşılan veriye değil.</p>
+        </div>
+        <div class="prevnext"><button data-page="kiosk-yonetim">Kiosk/TV &amp; Yönetim &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-kiosk-yonetim">
+      <div class="content">
+        <div class="crumb">Genel</div>
+        <h2>Kiosk/TV ve Yönetim Modu</h2>
+        <h3>Kiosk/TV (Yayın) modunda</h3>
+        <p>TV'ye bağlı bilgisayar tam ekran açılır ve aktif şablonu gösterir. Yönetim penceresini açmak veya
+        yayını başlatıp durdurmak için en pratik yöntem <strong>sistem tepsisindeki uygulama simgesidir</strong>:</p>
+        <ul>
+          <li><strong>Yönetim penceresini açmak için:</strong> tepsi simgesine <strong>çift tıklayın</strong> ya da
+            <strong>sağ tıklayıp "Yönetime Geç / Göster"i seçin</strong> — yayın kesilmeden Yönetim penceresi
+            açılır. TV'ye fiziksel erişiminiz olmasa bile (uzak masaüstü vb.) çalışır.</li>
+          <li><strong>Yayını başlatmak/durdurmak için:</strong> Yönetim penceresi açıldıktan sonra sol menünün
+            altındaki "Yayını Başlat" / "Yayını Durdur" butonunu kullanın.</li>
+          <li><strong>Uygulamadan tamamen çıkmak için:</strong> tepsi simgesine sağ tıklayıp "Çıkış"ı seçin.</li>
+          <li>İkincil/yedek yöntem: <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Y</kbd> de tam ekrandan çıkışı/girişi
+            tetikler (yönetici şifresi ister) — ama pencerenin odakta olmasını gerektirdiği için tepsi simgesi
+            kadar pratik değildir.</li>
+        </ul>
+        <h3>Yönetim modunda</h3>
+        <ul>
+          <li>Sol menüden <strong>Şablonlar</strong>, <strong>İçerikler</strong> ve <strong>Ayarlar</strong> arasında geçiş yaparsınız.</li>
+          <li>"Yayını Başlat" butonu (veya yine <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Y</kbd>) ile o bilgisayarda da tam
+            ekran yayın başlatabilirsiniz — Yönetim ve Yayın aynı anda (farklı ekranlarda) açık kalabilir.</li>
+          <li>Yönetim penceresini açmak <strong>hiçbir zaman şifre istemez</strong>. Şifre sadece gerçek değişiklik
+            yapan eylemlerde (yayını durdurma, modül silme) sorulur.</li>
+        </ul>
+        <div class="prevnext"><button class="prev" data-page="genel-bakis">&#8592; Genel Bakış</button><button data-page="sablonlar">Şablonlar &amp; Editör &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-sablonlar">
+      <div class="content">
+        <div class="crumb">Genel</div>
+        <h2>Şablonlar ve Editör</h2>
+        <p>Bir <strong>şablon</strong>, panodaki modüllerin ızgara üzerindeki yerleşim düzenidir. Aynı anda sadece bir
+        şablon "aktif"tir (yayınlanır), ama istediğiniz kadar şablon oluşturup aralarında geçiş yapabilirsiniz.</p>
+        <p>"+ Yeni Şablon" ile oluşturduğunuzda isim kutusu doğrudan düzenleme moduna açılır — kendi adınızı
+        yazıp <kbd>Enter</kbd>'a basabilirsiniz. Daha sonra adını değiştirmek isterseniz, şablon adının yanındaki
+        "Ad Değiştir" butonuna tıklayın.</p>
+        <h3>Çalışma alanı</h3>
+        <p>Editördeki çalışma alanı, ızgara sütun/satır sayısından bağımsız olarak <strong>her zaman Ayarlar'da seçili
+        yayın ekranının gerçek çözünürlüğünde</strong> (ör. 1920×1080) çizilir. Pencere bu boyuttan küçükse Excel'deki
+        gibi kaydırma çıkar — yerleştirdiğiniz modüllerin gerçek yayında ne kadar yer kaplayacağını editörde birebir görürsünüz.</p>
+        <h3>Modül ekleme, taşıma, boyutlandırma</h3>
+        <ul>
+          <li>Sol paneldeki <strong>Modül Ekleme Havuzu</strong>'ndan bir modül türüne tıklayarak panoya eklersiniz.</li>
+          <li>Bir modülü <strong>başlık çubuğundan</strong> fareyle tutup sürükleyerek taşıyabilirsiniz.</li>
+          <li>Modül seçiliyken yön tuşlarıyla taşır, <kbd>Shift</kbd>+yön tuşlarıyla boyutlandırırsınız.</li>
+          <li>Seçili modülün sağ alt köşesindeki tutamaçla fareyle de boyutlandırabilirsiniz.</li>
+          <li>Başlık çubuğundaki dişli simgesi ayarları, çöp kutusu silmeyi açar (silme yönetici şifresi ister).</li>
+        </ul>
+        <h3>Kayan Duyuru ve Okul Adı</h3>
+        <p>Panonun altındaki kayan yazı bir modül değil, şablonun kendi özelliğidir. Ayarlar → Kurum Bilgileri'nde
+        okul adı girilirse panonun en üstünde sabit bir başlık şeridi görünür; boşsa hiç gösterilmez.</p>
+        <h3>Görünüm Modu</h3>
+        <p>Editör panelindeki <strong>"Görünüm Modu"</strong> kartından, bu şablonun panoya çıktığında hangi taban
+        renkte gösterileceğini seçebilirsiniz: <strong>Koyu</strong> (varsayılan) veya <strong>Özel Renk</strong>.
+        Özel Renk seçildiğinde beliren renk kutusuna tıklayarak Windows'un kendi renk seçicisinden istediğiniz TEK
+        rengi seçersiniz — kart, liste, kenarlık ve metin tonlarının hepsi bu tek renkten otomatik olarak (aynı renk
+        ailesinde küçük açık/koyu adımlarla) türetilir, böylece hiçbir alan birbirinden kopuk/farklı bir renkte
+        kalmaz. Değişiklik hemen sağdaki önizlemeye yansır. Bu seçim SADECE o şablonun panodaki/önizlemedeki
+        görünümünü etkiler — Yönetim uygulamasının kendi menü, liste ve ayar ekranları her zaman koyu temada sabit
+        kalır. Farklı şablonların farklı renkleri olabilir; hangi şablon o an yayındaysa onun rengi geçerli olur.</p>
+        <div class="prevnext"><button class="prev" data-page="kiosk-yonetim">&#8592; Kiosk/TV &amp; Yönetim</button><button data-page="modul-ayarlari">Modül Ayarları &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-ayarlari">
+      <div class="content">
+        <div class="crumb">Genel</div>
+        <h2>Modül Ayarları</h2>
+        <ul>
+          <li><strong>Başlık</strong> ve <strong>Vurgu Rengi</strong> — her modülde ortak.</li>
+          <li><strong>Slayt Geçiş Süresi</strong> — birden fazla kaydı sırayla gösteren modüllerde (Duyurular,
+            Nöbetçi Öğretmen, Ayın Öğrencisi, Okulumuzdan Kareler, Tarihte Bugün, Temiz Sınıflar, Doğum Günleri)
+            sıradaki kayda kaç saniyede geçileceğini belirler.</li>
+          <li><strong>Modüle özel ayarlar</strong> — ör. Video'da ses düzeyi, Duyurular'da görsel yerleşimi, Doğum
+            Günleri'nde tarih aralığı.</li>
+          <li><strong>Gömülü içerik editörü</strong> — çoğu modülün ayarlar penceresinde, İçerikler menüsündeki karşılığıyla
+            AYNI düzenleme arayüzü görünür. Tek "Kaydet" butonu hem ayarları hem içeriği birlikte kaydeder.</li>
+        </ul>
+        <div class="prevnext"><button class="prev" data-page="sablonlar">&#8592; Şablonlar &amp; Editör</button><button data-page="medya">Fotoğraf/Video Seçimi &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-medya">
+      <div class="content">
+        <div class="crumb">Genel</div>
+        <h2>Fotoğraf/Video Seçimi</h2>
+        <p>"Foto Seç..." / "Video Seç..." butonuna tıklandığında Windows'un dosya seçme penceresi doğrudan ilgili
+        paylaşılan alt klasörde (ör. <code>Medya\Öğretmen Fotoğrafları</code>) açılır.</p>
+        <ul>
+          <li>Dosyayı o klasörden seçerseniz doğrudan kullanılır.</li>
+          <li>Başka bir yerden seçerseniz, dosya otomatik olarak ilgili paylaşılan klasöre kopyalanır.</li>
+        </ul>
+        <div class="callout tip">
+          <span class="label">Önemli</span>
+          <p>Kayıtlarda sadece dosya ADI tutulur, tam yol değil — veri klasörünü yeniden adlandırsanız/taşısanız bile,
+          Ayarlar'dan yeni konumu gösterdiğiniz anda tüm medya otomatik olarak yeniden bulunur.</p>
+        </div>
+        <div class="prevnext"><button class="prev" data-page="modul-ayarlari">&#8592; Modül Ayarları</button><button data-page="modul-genel">Modüller &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-genel">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Modüller</h2>
+        <p class="section-intro">Panoya eklenebilecek tüm modül türleri. İçerik girişlerinin çoğu Yönetim
+        penceresinin sol menüsündeki <strong>İçerikler</strong> alt menüsünden yapılır. Aşağıdan birine tıklayın.</p>
+        <div class="module-grid">
+          <button class="module-chip" data-page="modul-saat"><span class="ico">&#128337;</span>Saat &amp; Tarih</button>
+          <button class="module-chip" data-page="modul-nobetci"><span class="ico">&#128197;</span>Nöbetçi Öğretmen</button>
+          <button class="module-chip" data-page="modul-duyuru"><span class="ico">&#128226;</span>Duyurular</button>
+          <button class="module-chip" data-page="modul-ayin-ogrencisi"><span class="ico">&#127942;</span>Ayın Öğrencisi</button>
+          <button class="module-chip" data-page="modul-video"><span class="ico">&#127916;</span>Yerel Video</button>
+          <button class="module-chip" data-page="modul-tarihte-bugun"><span class="ico">&#128220;</span>Tarihte Bugün</button>
+          <button class="module-chip" data-page="modul-soru"><span class="ico">&#129504;</span>Beyin Egzersizi</button>
+          <button class="module-chip" data-page="modul-galeri"><span class="ico">&#128444;</span>Okulumuzdan Kareler</button>
+          <button class="module-chip" data-page="modul-yemek"><span class="ico">&#127869;</span>Yemek Menüsü</button>
+          <button class="module-chip" data-page="modul-dogum"><span class="ico">&#127874;</span>Doğum Günleri</button>
+          <button class="module-chip" data-page="modul-temiz"><span class="ico">&#129529;</span>Temiz Sınıflar</button>
+          <button class="module-chip" data-page="modul-ders"><span class="ico">&#128276;</span>Ders &amp; Teneffüs</button>
+          <button class="module-chip" data-page="modul-anons-yazi"><span class="ico">&#128227;</span>Büyük Anons (Yazı)</button>
+          <button class="module-chip" data-page="modul-anons-gorsel"><span class="ico">&#128227;</span>Büyük Anons (Görsel)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-saat">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Saat &amp; Tarih</h2>
+        <p>Güncel saat/tarihi ve (Ayarlar → Kurum Bilgileri'nde il/ilçe girilmişse) hava durumunu gösterir. Hava
+        durumu internet gerektirir, 30 dakikada bir güncellenir; bağlantı yoksa satır sessizce gizlenir. Ayrı bir
+        içerik girişi gerekmez.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-genel">&#8592; Modüller</button><button data-page="modul-nobetci">Nöbetçi Öğretmen &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-nobetci">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Nöbetçi Öğretmen</h2>
+        <p>İçerikler → <strong>Nöbet Çizelgesi</strong>'nden haftanın her günü için nöbetçi müdür yardımcısı ve kat
+        bazlı öğretmen ataması yapılır (öğretmenler Personel listesinden seçilir). Panoda o günün nöbet listesi
+        gösterilir, birkaç saniyede bir sıradaki kişiye geçilip fotoğrafı/branşı öne çıkarılır. Hafta sonu otomatik
+        olarak "Hafta sonu tatili" gösterir.</p>
+        <p>Modül ayarındaki <strong>"Nöbet Yeri Konumu"</strong> seçeneğiyle, her kişinin nöbet yerini (kat/bölge)
+        sağdaki fotoğraf paneline sıra gelmesini beklemeden doğrudan listede de görebilirsiniz: <strong>Sağda
+        Sütun</strong> (isimle aynı satırda, sağ tarafta) ya da <strong>İsmin Altında</strong> (isim altında ikinci
+        satır olarak) arasında seçim yapılabilir.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-saat">&#8592; Saat &amp; Tarih</button><button data-page="modul-duyuru">Duyurular &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-duyuru">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Duyurular</h2>
+        <p>Duyuru İÇERİĞİ (başlık/metin/görsel/tarih/önem) <strong>TÜM şablonlar arasında paylaşılır</strong>
+        — aynı duyuruyu her şablonda yeniden yazmanıza gerek yok. Ama <strong>hangi şablon(lar)da
+        gösterileceği</strong> ayrı ayrı seçilebilir. İçerikler → <strong>Duyurular</strong>'ı bağımsız
+        (soldaki menüden) açtığınızda üstte bir <strong>"Hangi Şablonda Düzenleniyor"</strong> seçici
+        belirir; Modül Ayarları (⚙️) içinden açtığınızda zaten hangi şablonu düzenlediğiniz belli
+        olduğundan bu seçici gizlenir. Her duyuru için:</p>
+        <ul>
+          <li><strong>Başlık</strong>, <strong>İçerik</strong>, opsiyonel <strong>Görsel</strong> — paylaşılan.</li>
+          <li><strong>Başlangıç Tarihi</strong> (varsayılan bugün) ve opsiyonel <strong>Bitiş Tarihi</strong> — bu
+            aralık dışındaki duyurular otomatik olarak yayından düşer (paylaşılan).</li>
+          <li><strong>DURUM</strong> kutucuğu (en soldaki sütun, "Yayında"/"Yayında Değil" yazısıyla) —
+            SEÇİLİ ŞABLONA ÖZGÜ: işaretlerseniz duyuru O şablonda (tarih aralığı uygunsa) gösterilir;
+            işareti kaldırırsanız sadece O şablonda kaldırılır, içerik ve diğer şablonlardaki durumu
+            etkilenmez. Bir duyuruyu birden fazla şablondan kaldırmak isterseniz, üstteki şablon
+            seçiciden her birine tek tek geçip kutucuğu kapatmanız yeterli.</li>
+          <li><strong>Önem</strong> derecesi (Normal/Önemli/Acil, Bitiş tarihinin sağında) — panoda renkli
+            bir rozetle gösterilir (paylaşılan).</li>
+        </ul>
+        <p>Modül ayarından görsel yerleşimini (üstte/solda) ve geçiş süresini değiştirebilirsiniz.</p>
+        <p>Bir duyuruyu <strong>Sil</strong> ile kaldırmak içerik PAYLAŞILAN olduğundan duyuruyu TÜM
+        şablonlardan siler (sadece seçili şablondan kaldırmak için "Bu Şablonda" kutusunu kapatmanız
+        yeterli). Sil ayrıca ilgili görseli klasörden SİLMEZ — aynı görsel başka bir duyuruda da
+        kullanılıyor olabilir. Kullanılmayan görselleri temizlemek isterseniz üstteki
+        <strong>"📂 Görsel Klasörünü Aç"</strong> butonuyla klasörü açıp istediğinizi elle silebilirsiniz.
+        Her silme işlemi önce "emin misiniz?" onayı ister; yönetici şifresi kurulmuşsa ayrıca oturumdaki
+        İLK silmede şifre de sorulur (sonraki silmelerde, aynı oturumda 20 dakika boyunca tekrar sorulmaz).</p>
+        <div class="prevnext"><button class="prev" data-page="modul-nobetci">&#8592; Nöbetçi Öğretmen</button><button data-page="modul-ayin-ogrencisi">Ayın Öğrencisi &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-ayin-ogrencisi">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Ayın Öğrencisi</h2>
+        <p>İçerikler → <strong>Ayın Öğrencisi</strong>'nden, yılın her ayı için ayrı bir öğrenci eklenebilir (Ad,
+        Sınıf, Seçilme Gerekçesi, opsiyonel Söz, Fotoğraf). Sadece "Yayında" işaretli olanlar panoda sırayla gösterilir.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-duyuru">&#8592; Duyurular</button><button data-page="modul-video">Yerel Video &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-video">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Yerel Video</h2>
+        <p>Video listesi artık <strong>ŞABLONA ÖZGÜ</strong> — A şablonunda oynattığınız videolarla B
+        şablonunda oynattıklarınız tamamen bağımsızdır. İçerikler → <strong>Yerel Videolar</strong>'ı
+        bağımsız (soldaki menüden) açtığınızda üstte bir <strong>"Hangi Şablonun Videoları"</strong>
+        seçici belirir; Modül Ayarları (⚙️) içinden açtığınızda zaten hangi şablonu düzenlediğiniz belli
+        olduğundan bu seçici gizlenir. Her video için gösterim günü (haftanın belirli günü veya "Her Gün")
+        ve aktif/pasif durumu ayarlanır. Panoda bugüne planlı ve aktif olan videolar sırayla, biri bitince
+        otomatik diğerine geçerek oynatılır. Ses/sessiz ve ses düzeyi modül ayarından belirlenir.</p>
+        <p>"🎬 Video Seç..." ile büyük bir video dosyası seçtiğinizde (özellikle ağ paylaşımlı bir veri
+        klasörüne kopyalanırken) buton "⏳ İçe aktarılıyor, lütfen bekleyin..." yazısına döner ve kopyalama
+        bitene kadar bu şekilde kalır — pencere donmuş gibi görünmez, arayüz kopyalama sırasında da
+        kullanılabilir kalır. "+ Video Ekle" ile eklenen yeni (boş) kart, liste uzunsa otomatik olarak
+        görünür alana kaydırılır — kartın eklendiğini görmek için aşağı inmeniz gerekmez.</p>
+        <p><strong>🗂 Klasördeki Dosyalar:</strong> Bu butona basınca, paylaşılan Medya\Videolar klasöründeki
+        TÜM dosyalar (herhangi bir video kartında kullanılan/kullanılmayan hepsi) listelenir — her dosyanın
+        yanında "Kullanılıyor" ya da "Kullanılmıyor" ibaresi ve bir Sil butonu bulunur. Artık ihtiyaç
+        duyulmayan video dosyalarını buradan tamamen silebilirsiniz, uzaktaki Yayın PC'sine Windows Gezgini
+        ile bağlanmanıza gerek kalmaz. "Kullanılıyor" olan bir dosyayı silmek isterseniz (başka bir şablonun
+        video kartında kullanılıyor olabilir) onay penceresi bunu açıkça belirtir.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-ayin-ogrencisi">&#8592; Ayın Öğrencisi</button><button data-page="modul-tarihte-bugun">Tarihte Bugün &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-tarihte-bugun">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Tarihte Bugün</h2>
+        <p>İçerikler → <strong>Tarihte Bugün</strong>'den belirli bir tarihe (ör. "19 Temmuz") ait olaylar eklenir.
+        Panoda o günün tarihiyle eşleşen TÜM kayıtlar sırayla gösterilir (aynı tarihe birden fazla kayıt eklenebilir).
+        Hiç kayıt yoksa "Genel" etiketli kayıtlar kullanılır.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-video">&#8592; Yerel Video</button><button data-page="modul-soru">Beyin Egzersizi &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-soru">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Haftanın Beyin Egzersizi</h2>
+        <p>İçerikler → <strong>Haftanın Beyin Egzersizi</strong>'nden haftalık bir soru/bilmece girilir, panoda gösterilir.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-tarihte-bugun">&#8592; Tarihte Bugün</button><button data-page="modul-galeri">Okulumuzdan Kareler &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-galeri">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Okulumuzdan Kareler</h2>
+        <p>İçerikler → <strong>Okulumuzdan Kareler</strong>'den "+ Fotoğraf Ekle" ile kendi bilgisayarınızdaki
+        istediğiniz kadar fotoğrafı (aynı anda çoklu seçim yapılabilir) seçersiniz — hangi klasöre kaydedileceğini
+        bilmenize gerek yok, uygulama seçtiğiniz fotoğrafları otomatik olarak doğru klasöre kopyalar. Eklenen tüm
+        fotoğraflar panoda otomatik olarak sırayla gösterilir; bir fotoğrafın üzerindeki ✕ ile kaldırabilirsiniz.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-soru">&#8592; Beyin Egzersizi</button><button data-page="modul-yemek">Yemek Menüsü &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-yemek">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Yemek Menüsü</h2>
+        <p>İçerikler → <strong>Yemek Menüsü</strong>'nden haftanın her günü için 4 yemek alanı + kalori bilgisi girilir.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-galeri">&#8592; Okulumuzdan Kareler</button><button data-page="modul-dogum">Doğum Günleri &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-dogum">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Doğum Günleri</h2>
+        <p>Bu modülün içeriği, artık ayrı bir liste DEĞİL — İçerikler menüsündeki <strong>🎓 Öğrenciler</strong>
+        sayfasındaki genel öğrenci listesinden (Personel'in öğrenci karşılığı) doğum tarihi bilgisi okunarak
+        otomatik oluşturulur. Yani doğum günlerini panoda göstermek için ayrıca bir yere veri girmenize gerek
+        yok — Öğrenciler sayfasına bir öğrenciyi Gün/Ay bilgisiyle eklediğinizde (ya da toplu aktarımda doğum
+        tarihi sütunu geldiyse), o öğrenci otomatik olarak uygun tarihte panoda görünür.</p>
+        <p><strong>Önemli — bu modülün ⚙️ ayarlar penceresinde artık bir "içerik" bölümü YOK:</strong> Personel
+        &amp; Öğretmenler nasıl kendi başına bir modül DEĞİLSE (sadece diğer modüllerin/sayfaların okuduğu ortak
+        bir veri kaynağıysa), Öğrenciler de aynı şekilde çalışır — Doğum Günleri modülünün ⚙️ ayarlarında artık
+        SADECE görüntüleme ayarları (Doğum Günü Aralığı: Bugün/Bu Hafta/Bu Ay, Slayt Geçiş Süresi) var, öğrenci
+        eklemek/silmek için ayrıca İçerikler → <strong>🎓 Öğrenciler</strong> sayfasına gidilir. Bir şablonda
+        birden fazla Doğum Günleri modülü olsa bile (ör. farklı aralıklarla) hepsi AYNI Öğrenciler listesini
+        okur — listeyi bir kez düzenlemeniz, tüm şablonlardaki tüm Doğum Günleri modüllerine yansır.</p>
+        <p><strong>Öğrenciler sayfası</strong> liste görünümündedir: en üstte "Toplu Aktarım" ve tek satırlık
+        ekleme formu (Ad Soyad, Sınıf, Cinsiyet, Gün, Ay) sabit durur, onun altında sütun başlığı ve arama
+        kutusu sabittir, en altta ise öğrenciler kompakt tek satırlık kartlar hâlinde kayan bir liste olarak
+        gösterilir — büyük öğrenci sayılarında (yüzlerce öğrenci) aramak/gezmek kolaylaşsın diye, liste
+        (arama kutusu boşken de) <strong>ada göre alfabetik</strong> sıralıdır. Her
+        satırdaki "📷 Foto Ekle" ile öğrenciye fotoğraf atanabilir; fotoğraf yoksa cinsiyete uygun bir silüet
+        otomatik gösterilir (Personel &amp; Öğretmenler'deki aynı davranış). <strong>Cinsiyet listede her
+        satırda da düzenlenebilir</strong> — eklendikten sonra fikir değiştirilebilir.</p>
+        <p><strong>Toplu Aktarım (Kopyala-Yapıştır):</strong> e-Okul veya Excel'den öğrenci listenizi kopyalayıp
+        "Toplu Aktarım" kutusuna yapıştırabilirsiniz. İlk satır başlık olmalı; Ad Soyad (ya da ayrı Adı/Soyadı)
+        ve Sınıf sütunları yeterli, Cinsiyet ve doğum tarihi <strong>opsiyoneldir</strong> — doğum tarihi için
+        tek bir "Doğum Tarihi" sütunu (gg.aa.yyyy) ya da ayrı "Gün"/"Ay" sütunlarını kullanabilirsiniz.
+        <strong>Sütunların sırası önemli değildir</strong>, başlık metinlerinden otomatik bulunur (Sınıf Ders
+        Programı'ndaki yapıştırma özelliğiyle aynı mantık); büyük/küçük harf ve Türkçe ek (ör. "Adı", "Soyadı")
+        farketmez.</p>
+        <div class="callout tip">
+          <span class="label">Sütunlar nasıl ayrılır</span>
+          <p>Excel'den kopyalayıp buraya yapıştırdığınızda hücreler otomatik olarak TAB karakteriyle ayrılır —
+          bu her zaman doğru çalışır. Örnek veriyi ELLE yazıyorsanız sütunlar arasına
+          <strong>noktalı virgül (;)</strong> koyun — ör. <code>Ad Soyad;Sınıf;DoğumTarihi</code>.</p>
+        </div>
+        <p><strong>Yeni öğretim yılında listeyi tamamen yenileme:</strong> Toplu Aktarım kutusunun altındaki
+        "Yapıştırmadan önce mevcut öğrenci listesini TAMAMEN sil" kutucuğunu işaretleyip yapıştırırsanız —
+        onay istendikten sonra — <strong>mevcut TÜM öğrenciler silinir</strong> ve yerine SADECE
+        yapıştırdığınız yeni liste eklenir; bu, e-Okul'dan alınan yeni yıl roster'ını tek adımda uygulamak
+        içindir. <strong>Personel listesine hiç dokunulmaz</strong> — öğretmen/personel kayıtları zaten ayrı
+        bir listede tutulur, bu işlemden etkilenmez. Kutucuk işaretli DEĞİLSE (varsayılan), yapıştırma normal
+        şekilde EKLEME yapar — zaten listede olan bir isim tekrar eklenmez, tek tek yeni öğrenci eklemek için
+        güvenlidir.</p>
+        <p><strong>Arama:</strong> Liste başlığının yanındaki arama kutusuna öğrenci adı yazıldığında liste anında
+        filtrelenir — tek bir öğrenciyi bulup silmek için kullanışlıdır.</p>
+        <p>Panoda gösterilecek aralık modül ⚙️ ayarından seçilir: <strong>Bugün</strong> / <strong>Bu Hafta</strong> /
+        <strong>Bu Ay</strong> (varsayılan Bu Hafta). Aralığa birden fazla kişi düşerse sırayla gösterilir. Doğum
+        tarihi girilmemiş öğrenciler bu modülde hiç görünmez (ama Öğrenciler listesinde durur).</p>
+        <div class="prevnext"><button class="prev" data-page="modul-yemek">&#8592; Yemek Menüsü</button><button data-page="modul-temiz">Temiz Sınıflar &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-temiz">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Haftanın Temiz Sınıfları</h2>
+        <p>İçerikler → <strong>Haftanın Temiz Sınıfları</strong>'ndan sınıf adı, değerlendirme puanı ve ödül/ünvan
+        girilir. Sıralama <strong>otomatik olarak puana göre</strong> (yüksekten düşüğe) yapılır — hangi sırada
+        eklediğinizin önemi yoktur, en yüksek puanlı sınıf her zaman "1. Sıra" olarak gösterilir.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-dogum">&#8592; Doğum Günleri</button><button data-page="modul-ders">Ders &amp; Teneffüs &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-ders">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Ders &amp; Teneffüs Saatleri</h2>
+        <p>Bu modül iki ayrı sayfadan beslenir:</p>
+        <ul>
+          <li><strong>İçerikler → Ders &amp; Zil Saatleri:</strong> Periyotların saatlerini tanımlarsınız. Üstteki
+            "Otomatik Oluştur" kartına başlangıç saati, ders süresi, teneffüs süresi ve periyot sayısı girip tüm
+            periyotları tek seferde oluşturabilirsiniz. Her periyot kartında Ders Adı, Başlangıç ve Bitiş saatleri
+            de ayrı ayrı düzenlenebilir — birini değiştirip <kbd>Enter</kbd>'a bastığınızda (ör. öğlen arası gibi
+            standart dışı bir teneffüs için), o periyottan SONRAKİ tüm periyotların saatleri otomatik olarak yeniden
+            hesaplanır. Yapılan her değişiklik anında kaydedilir.</li>
+          <li><strong>İçerikler → Sınıf Ders Programı:</strong> Önce "Seviye" (ör. 9) + "Şube/Alan" (ör. A, KSH, Büro)
+            girip sınıfı tanımlarsınız (isim "Seviye-Şube" biçiminde birleşir, ör. "9-KSH"). Sonra seçili sınıf için
+            gün×periyot matrisine ders adı ve (opsiyonel) öğretmen tek tek girilebilir — ya da aşağıdaki Excel'den
+            yapıştırma ile toplu doldurulabilir.</li>
+        </ul>
+        <p>Panoda: o an ders saatindeyse, o periyotta dersi olan TÜM sınıfları (Sınıf | Ders | Öğretmen) bir tabloda
+        gösterir. Teneffüsteyse, son biten periyodun tablosu altta kalmaya devam eder, üzerine yarı saydam
+        <strong>"TENEFFÜS"</strong> yazısı biner; teneffüs bitince otomatik olarak sıradaki periyoda geçer.</p>
+        <div class="callout tip">
+          <span class="label">Excel'den yapıştırma</span>
+          <p>Bir sınıf seçiliyken, o sınıfın haftalık ders programını Excel'de kopyalayıp "Yapıştırılanı Uygula"
+          kutusuna yapıştırabilirsiniz:</p>
+          <ul>
+            <li><strong>Gün sütun sırası önemli değildir</strong> — yapıştırılan ilk satırda gün adları (tam ad veya
+              Pzt/Sal/Çar/Per/Cum gibi kısaltmalar) varsa, hangi sütunun hangi güne ait olduğu oradan otomatik
+              okunur. Satır sırası her zaman 1. periyottan başlamalıdır.</li>
+            <li><strong>Öğretmen kısaltması otomatik eşleştirilir</strong> — bir hücrede ders adının altına (Excel'de
+              <kbd>Alt</kbd>+<kbd>Enter</kbd> ile) "A. Yılmaz" gibi kısaltılmış bir öğretmen adı yazılmışsa, Personel
+              listesindeki tam adla eşleştirilmeye çalışılır. Sadece TEK net eşleşme varsa otomatik kullanılır;
+              belirsizse yazdığınız gibi kaydedilir (yanlış eşleştirmektense güvenli taraf seçilir). Yapıştırma
+              sonrası kaç kısaltmanın eşleştiğini/eşleşmediğini bildiren bir durum mesajı görürsünüz.</li>
+            <li>"Ders - Öğretmen" biçiminde tek satırda yazılmış hücreler de desteklenir (tire ile ayrılmış).</li>
+          </ul>
+        </div>
+        <div class="prevnext"><button class="prev" data-page="modul-temiz">&#8592; Temiz Sınıflar</button><button data-page="modul-anons-yazi">Büyük Anons (Yazı) &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-anons-yazi">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Büyük Anons (Yazı)</h2>
+        <p>Sınav dönemleri (ÖSYM, Açık Öğretim Fakültesi sınavları vb.) gibi, idarenin ekran boyunca kocaman
+        punto ile TEK bir yazılı anons göstermek istediği durumlar için düşünülmüş bir modüldür. Duyurular
+        modülünün aksine dönen bir liste DEĞİLDİR — sadece girdiğiniz TEK metni büyük şekilde gösterir.</p>
+        <p>Modülün ⚙️ ayarından:</p>
+        <ul>
+          <li><strong>Anons Metni</strong> — göstermek istediğiniz yazı.</li>
+          <li><strong>Yazı Boyutu (pt)</strong> — 24-200 punto arası kaydırıcıyla seçilir.</li>
+          <li><strong>Yazı Tipi</strong> — Segoe UI, Segoe UI Black, Arial, Arial Black, Calibri, Tahoma, Impact
+            gibi Windows'ta hazır bulunan yazı tiplerinden seçilir.</li>
+        </ul>
+        <p>Seçtiğiniz punto, modülün kapladığı alana sığmıyorsa önce satır satır alt satıra kayar; hâlâ
+        sığmıyorsa (satırlar bile taşıyorsa) tüm blok orantılı olarak küçültülür — asla taşmaz/kırpılmaz.
+        Ama alan yeterliyse seçtiğiniz punto birebir uygulanır.</p>
+        <p>Büyük Anons (Görsel) gibi bu modül de <strong>aynı şablona istediğiniz kadar kez eklenebilir</strong> —
+        Modül Ekleme Havuzu'nda "Ekle +" butonu bu modül için hiç kaybolmaz. Örneğin iki farklı anons
+        metnini yan yana/alt alta göstermek isterseniz, modülden ikinci bir kopya ekleyip her birine ⚙️
+        ayarından kendi metnini/boyutunu/yazı tipini atar, sonra normal ızgara editörüyle istediğiniz gibi
+        dizersiniz.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-ders">&#8592; Ders &amp; Teneffüs</button><button data-page="modul-anons-gorsel">Büyük Anons (Görsel) &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-modul-anons-gorsel">
+      <div class="content">
+        <div class="crumb">Modüller</div>
+        <h2>Büyük Anons (Görsel)</h2>
+        <p>Büyük Anons (Yazı) ile aynı amaca hizmet eder, ama metin yerine görsel içindir — ör. ÖSYM'nin
+        yayınladığı bir duyuru afişi/kroki. Okulumuzdan Kareler'e benzer görünse de aralarındaki fark önemlidir:
+        bu modül bir slayt havuzu DEĞİLDİR, DÖNMEZ — sadece seçtiğiniz TEK, sabit görseli gösterir.</p>
+        <p>Diğer modül tiplerinin aksine (genel kural: bir tip bir şablona sadece BİR kez eklenebilir),
+        <strong>Büyük Anons (Görsel) istisnai olarak aynı şablona istediğiniz kadar kez eklenebilir</strong> —
+        Modül Ekleme Havuzu'nda "Ekle +" butonu bu modül için hiç kaybolmaz. Böylece aynı anda birden fazla
+        görsel göstermek istediğinizde (ör. iki afiş yan yana, üç tanesi alt alta, 2x2, 3x2, ya da tamamen
+        kendi tasarladığınız bir düzen) bu modülden istediğiniz kadar ekleyip her birine ⚙️ ayarından KENDİ
+        görselini atar, sonra normal ızgara editörüyle (sürükleyerek taşıma/boyutlandırma) tamamen
+        istediğiniz gibi dizersiniz — yerleşim tamamen size kalır.</p>
+        <p>Her kopyanın ⚙️ ayarından "Fotoğraf Seç" ile kendi bilgisayarınızdan görseli seçersiniz (diğer
+        fotoğraf seçicilerle aynı "seç, biz halledelim" mantığı — hangi klasöre kaydedileceğini bilmenize
+        gerek yok). Görseller, Okulumuzdan Kareler'in kullandığı Slayt klasöründen AYRI bir klasörde
+        tutulur, bu yüzden oradaki otomatik döngüye karışmaz.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-anons-yazi">&#8592; Büyük Anons (Yazı)</button><button data-page="personel">Personel &amp; Öğretmenler &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-personel">
+      <div class="content">
+        <div class="crumb">Diğer</div>
+        <h2>Personel &amp; Öğretmenler</h2>
+        <p>İçerikler → <strong>Personel &amp; Öğretmenler</strong>'den öğretmen/personel listesi yönetilir — İsim,
+        Kategori (Öğretmen/Diğer Personel), Branş, Görev, Cinsiyet (fotoğrafsız kayıtlarda otomatik silüet için),
+        Fotoğraf ve doğum tarihi (Gün/Ay, opsiyonel). Liste <strong>ada göre alfabetik</strong> sıralı gösterilir —
+        aramayı/bulmayı kolaylaştırmak için. <strong>Cinsiyet listede her satırda da düzenlenebilir</strong>
+        (bir kayıt eklendikten SONRA da değiştirilebilir — ör. toplu aktarımda Cinsiyet sütunu yoksa herkes "Erkek"
+        eklenir, buradan tek tek düzeltilebilir).</p>
+        <p><strong>Toplu Aktarım (Kopyala-Yapıştır):</strong> Excel'den personel listenizi kopyalayıp yapıştırabilirsiniz.
+        İlk satır başlık olmalı; Ad Soyad (ya da ayrı Adı/Soyadı) yeterli, Branş/Cinsiyet/Görev-Ünvan/doğum tarihi
+        (tek bir "Doğum Tarihi" sütunu ya da ayrı "Gün"/"Ay") hepsi opsiyonel — <strong>sütunların sırası önemli
+        değildir</strong>, başlık metinlerinden otomatik bulunur; büyük/küçük harf ve Türkçe ek (ör. "Görev",
+        "Görevi", "Ünvanı", "Adı", "Soyadı") farketmez. <strong>Bir Görev/Ünvan sütunu varsa</strong> her
+        satır kendi göreviyle eklenir ve Kategori o göreve göre belirlenir — metninde "öğretmen" geçmiyorsa (ör.
+        "Memur", "Hizmetli", "Müdür Yardımcısı") otomatik olarak "Diğer Personel" kategorisine girer, Branş boş
+        bırakılabilir. Görev sütunu YOKSA eski, basit davranış korunur: tüm satırlar "Öğretmen" olarak eklenir.
+        Zaten AYNEN listede olan bir isim sessizce atlanır; <strong>benzer görünen</strong> bir isim
+        bulunursa (ör. listede "Mehmet Sait Örnek" varken yapıştırılan satır "M. Sait Örnek" diyorsa) uygulama
+        otomatik karar vermez — "aynı kişi olabilir, yine de ayrı eklensin mi?" diye sorar, siz karar
+        verirsiniz. Bu sayede hem birkaç yeni öğretmenlik küçük bir liste, hem de okulun TÜM personel listesinin
+        (öğretmen + öğretmen olmayan personel bir arada) yeniden yapıştırılması güvenle yapılabilir.</p>
+        <div class="callout tip">
+          <span class="label">Sütunlar nasıl ayrılır</span>
+          <p>Excel'den kopyalayıp buraya yapıştırdığınızda hücreler otomatik olarak TAB karakteriyle ayrılır —
+          bu her zaman doğru çalışır, ekstra bir şey yapmanıza gerek yoktur. Örnek veriyi ELLE yazıyorsanız
+          (Excel'den kopyalamadan, doğrudan kutuya yazarak) sütunlar arasına <strong>noktalı virgül (;)</strong>
+          koyun — ör. <code>Ad Soyad;Görevi;DoğumTarihi</code>. Sütunlar hiç ayrılamazsa ("Sütunlar tanınamadı"
+          hatası) uygulama artık bu ipucunu durum mesajında da gösterir.</p>
+        </div>
+        <p>Bu liste, Nöbet Çizelgesi'ndeki öğretmen seçiminde kullanılır. Personel'in doğum tarihi şu an SADECE
+        veri olarak tutulur, panoda henüz gösterilmiyor (Doğum Günleri modülü sadece <strong>🎓 Öğrenciler</strong>
+        listesini kapsıyor) — ileride istenirse ayrı bir gösterim eklenebilir.</p>
+        <div class="prevnext"><button class="prev" data-page="modul-anons-gorsel">&#8592; Büyük Anons (Görsel)</button><button data-page="ayarlar">Ayarlar &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-ayarlar">
+      <div class="content">
+        <div class="crumb">Diğer</div>
+        <h2>Ayarlar Sayfası</h2>
+        <ul>
+          <li><strong>Veri Klasörü</strong> — paylaşılan verinin tutulduğu klasör; Yayın ve Yönetim farklı PC'lerdeyse
+            ikisi de aynı ağ paylaşımlı klasörü göstermelidir.</li>
+          <li><strong>Kiosk/TV Ekranı</strong> — çoklu monitör varsa tam ekranın hangi ekranda açılacağı; Şablon
+            Editörü'ndeki çalışma alanı boyutu da bu ekranın çözünürlüğüne göre belirlenir.</li>
+          <li><strong>Başlangıç Modu</strong> — bu PC açıldığında Kiosk/TV mu Yönetim mi olarak başlayacağı.</li>
+          <li><strong>Otomatik Başlatma</strong> — Windows açılışında otomatik başlama (Kiosk/TV PC'si için önerilir).</li>
+          <li><strong>Yönetici Şifresi</strong> — kritik işlemler için; paylaşılan veride tutulur, hangi PC'den
+            girilirse girilsin aynıdır.</li>
+          <li><strong>Tema Rengi</strong> — arayüzün aksan rengi.</li>
+          <li><strong>Kurum Bilgileri</strong> — okul adı (pano başlığında) ve il/ilçe (hava durumu için).</li>
+        </ul>
+        <div class="prevnext"><button class="prev" data-page="personel">&#8592; Personel &amp; Öğretmenler</button><button data-page="ipuclari">İpuçları &amp; SSS &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-ipuclari">
+      <div class="content">
+        <div class="crumb">Diğer</div>
+        <h2>İpuçları ve Sık Sorulanlar</h2>
+
+        <div class="faq-item">
+          <p class="q">Sistem tepsisi ikonunu göremiyorum.</p>
+          <p class="a">Windows, yeni/az kullanılan tepsi ikonlarını görev çubuğundaki "^" (gizli simgeleri göster)
+          okunun arkasına saklayabilir. O oka tıklayıp simgeyi sürükleyerek her zaman görünür alana taşıyabilirsiniz.</p>
+        </div>
+        <div class="faq-item">
+          <p class="q">Bir sayfada yaptığım değişiklik başka bir sayfaya yansımıyor.</p>
+          <p class="a">Çoğu içerik sayfasının kendi "Kaydet" butonuna basmanız gerekir (bazı sayfalar — ör. Ders &amp;
+          Zil Saatleri — artık her değişiklikte otomatik kaydeder). Modül ayarları penceresine gömülü sayfalarda TEK bir
+          "Kaydet" butonu hem modül ayarını hem içeriği birlikte kaydeder.</p>
+        </div>
+        <div class="faq-item">
+          <p class="q">Veri klasörünü taşıdım/yeniden adlandırdım, fotoğraflar/videolar kayboldu.</p>
+          <p class="a">Ayarlar sayfasından yeni veri klasörü konumunu gösterin — kayıtlarda sadece dosya adı
+          tutulduğu için tüm medya otomatik olarak yeniden bulunur.</p>
+        </div>
+        <div class="faq-item">
+          <p class="q">Uygulamayı açtığımda "Veri Klasörüne Ulaşılamıyor" diyor.</p>
+          <p class="a">Bu, veri klasörünüzün paylaşıldığı PC'ye (genellikle Yayın/Kiosk PC'si) o an ağ
+          üzerinden ulaşılamadığı anlamına gelir — en sık sebep o PC'nin KAPALI olmasıdır. Mesaj klasör
+          yolunu gösterir; <strong>"Tamam"a</strong> bastığınızda uygulama YİNE DE açılır (sizi bekletip
+          bloke etmez), sadece içerikler o an boş görünür. Yayın PC'sini açıp ağa bağladıktan sonra
+          uygulamayı kapatıp tekrar açmanız yeterli — verileriniz kaybolmaz, sadece geçici olarak
+          görünmezler. O PC'yi artık kullanmayacaksanız (ör. veri klasörünü kalıcı olarak başka bir PC'ye
+          taşıdıysanız), <strong>Ayarlar sayfasından</strong> "Veri Klasörünü Değiştir" ile yeni konumu
+          gösterebilirsiniz.</p>
+        </div>
+        <div class="faq-item">
+          <p class="q">Yönetim penceresini nasıl açarım, yayını nasıl başlatıp durdururum?</p>
+          <p class="a">En pratik yöntem sistem tepsisindeki simgedir: <strong>çift tıklayın</strong> ya da
+          <strong>sağ tıklayıp "Yönetime Geç / Göster"i seçin</strong> — Yönetim penceresi açılır, yayın kesilmez.
+          Yönetim penceresi açıldıktan sonra, yayını başlatmak/durdurmak için sol menünün altındaki
+          <strong>"Yayını Başlat" / "Yayını Durdur"</strong> butonunu kullanın. Uygulamadan tamamen çıkmak
+          için tepsi simgesine sağ tıklayıp <strong>"Çıkış"ı</strong> seçin.</p>
+          <p class="a" style="margin-top:8px;"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Y</kbd> kısayolu da aynı işi
+          (tam ekrandan çıkış/giriş) yapar, ama pencerenin odakta olmasını gerektirdiği için pratikte tepsi
+          simgesi + buton kadar kullanışlı değildir — yine de yedek bir yöntem olarak durur.</p>
+        </div>
+
+        <footer class="page-footer">Okul Panosu — Dijital Okul Bilgi Panosu.</footer>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="text/javascript">
+  (function () {
+    var pageIds = [];
+    var pages = {};
+    var i, els = document.getElementsByClassName('page');
+    for (i = 0; i < els.length; i++) {
+      var id = els[i].id.replace('page-', '');
+      pageIds.push(id);
+      pages[id] = els[i];
+    }
+
+    function getNavButtons() {
+      var all = document.getElementsByTagName('button');
+      var result = [];
+      for (var n = 0; n < all.length; n++) {
+        if (all[n].getAttribute('data-page')) result.push(all[n]);
+      }
+      return result;
+    }
+    var navButtons = getNavButtons();
+    var main = document.getElementById('main');
+
+    function hasClass(el, cls) {
+      return (' ' + el.className + ' ').indexOf(' ' + cls + ' ') > -1;
+    }
+
+    function show(id) {
+      if (!pages[id]) return;
+      var k, j;
+      for (k = 0; k < pageIds.length; k++) {
+        var pid = pageIds[k];
+        pages[pid].className = (pid === id) ? 'page active' : 'page';
+      }
+      for (j = 0; j < navButtons.length; j++) {
+        var btn = navButtons[j];
+        if (hasClass(btn, 'item')) {
+          btn.className = (btn.getAttribute('data-page') === id) ? 'item active' : 'item';
+        }
+      }
+      if (main) main.scrollTop = 0;
+    }
+
+    for (i = 0; i < navButtons.length; i++) {
+      (function (btn) {
+        if (btn.attachEvent) {
+          btn.attachEvent('onclick', function () { show(btn.getAttribute('data-page')); });
+        } else {
+          btn.addEventListener('click', function () { show(btn.getAttribute('data-page')); }, false);
+        }
+      })(navButtons[i]);
+    }
+
+    show('genel-bakis');
+  })();
+</script>
+</body>
+</html>

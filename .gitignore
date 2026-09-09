@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+publish/
+YAYIN/
+*.user
+.claude/settings.local.json

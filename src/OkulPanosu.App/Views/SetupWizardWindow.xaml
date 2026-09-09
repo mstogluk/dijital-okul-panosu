@@ -1,0 +1,42 @@
+<Window x:Class="OkulPanosu.App.Views.SetupWizardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Okul Panosu - Kurulum" Icon="/Assets/AppIcon.ico" Height="380" Width="480"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" ShowInTaskbar="True" Background="{StaticResource BgPrimaryBrush}">
+    <Grid Margin="24" Background="{StaticResource BgPrimaryBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="🖥️ Okul Panosu Kurulumu" FontSize="18" FontWeight="Bold" Margin="0,0,0,4" />
+        <TextBlock Grid.Row="1" Text="Bu bilgisayar nasıl kullanılacak?" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,12" />
+
+        <StackPanel Grid.Row="2" Margin="0,0,0,20">
+            <RadioButton x:Name="KioskRadio" Content="Yayın (Kiosk) — TV/panoda tam ekran yayın yapar" IsChecked="True" Margin="0,0,0,10" GroupName="Mode" />
+            <RadioButton x:Name="ManagementRadio" Content="Yönetim — şablonları ve içerikleri düzenler" GroupName="Mode" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" Text="Veri Klasörü" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+        <TextBlock Grid.Row="4" Text="Tek bilgisayarda çalışacaksanız aşağıdaki varsayılan klasör yeterli. Yayın ve Yönetim ayrı bilgisayarlardaysa, ikisinin de aynı ağ paylaşımlı klasörü göstermesi gerekir — bu durumda 'Klasör Seç...' ile ortak bir ağ klasörü (ör. \\SUNUCU\OkulPanosu) seçin." Style="{StaticResource MutedTextStyle}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="5" VerticalAlignment="Top">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="FolderText" Style="{StaticResource WatermarkTextBoxStyle}" IsReadOnly="True" Margin="0,0,8,0" />
+                <Button Grid.Column="1" Content="Klasör Seç..." Style="{StaticResource SecondaryButtonStyle}" Click="ChooseFolder_Click" />
+            </Grid>
+            <TextBlock x:Name="ErrorText" Foreground="{StaticResource DangerBrush}" Margin="0,8,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+        </StackPanel>
+
+        <Button Grid.Row="6" Content="Devam Et" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" Width="120" Margin="0,16,0,0" Click="Continue_Click" />
+    </Grid>
+</Window>

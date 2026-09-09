@@ -1,0 +1,31 @@
+<UserControl x:Class="OkulPanosu.App.Views.SchoolGalleryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="24" Background="{StaticResource BgPrimaryBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="🖼️ Okulumuzdan Kareler" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Content="+ Fotoğraf Ekle" Style="{StaticResource PrimaryButtonStyle}" Click="AddPhotos_Click" />
+        </Grid>
+
+        <TextBlock Grid.Row="1" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,10,0,0"
+                   Text="Kendi bilgisayarınızdan seçtiğiniz fotoğraflar otomatik olarak panoya kopyalanır — hiçbir klasör bilgisine ihtiyacınız yok. Eklenen tüm fotoğraflar panoda otomatik olarak sırayla gösterilir. Birden fazla fotoğrafı aynı anda seçebilirsiniz." />
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,16,0,0">
+            <Grid>
+                <TextBlock x:Name="EmptyText" Style="{StaticResource MutedTextStyle}" FontSize="14"
+                           Text="Henüz fotoğraf eklenmedi." Visibility="Collapsed" />
+                <WrapPanel x:Name="PhotosPanel" />
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

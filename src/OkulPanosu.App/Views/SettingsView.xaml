@@ -1,0 +1,76 @@
+<UserControl x:Class="OkulPanosu.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer Margin="24" VerticalScrollBarVisibility="Auto" Background="{StaticResource BgPrimaryBrush}">
+        <StackPanel MaxWidth="640">
+            <TextBlock Text="⚙️ Ayarlar" FontSize="20" FontWeight="Bold" Margin="0,0,0,16" />
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Kurum Bilgileri" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                    <TextBlock Text="Paylaşılan veride tutulur — tüm PC'lerde ve ticker/başlık gibi yerlerde buradan okunur." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,10" />
+                    <TextBlock Text="Okul Adı" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,4" />
+                    <TextBox x:Name="InstitutionNameBox" Style="{StaticResource WatermarkTextBoxStyle}" LostFocus="InstitutionInfo_Changed" Margin="0,0,0,10" />
+                    <TextBlock Text="İl / İlçe (hava durumu modülü için)" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,4" />
+                    <TextBox x:Name="InstitutionCityBox" Style="{StaticResource WatermarkTextBoxStyle}" LostFocus="InstitutionInfo_Changed" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Veri Klasörü" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                    <TextBlock Text="Yayın ve Yönetim bilgisayarları aynı klasörü (yerel veya ağ paylaşımlı) kullanmalı." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,10" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="DataFolderText" Grid.Column="0" Style="{StaticResource WatermarkTextBoxStyle}" IsReadOnly="True" Margin="0,0,8,0" />
+                        <Button Grid.Column="1" Content="Değiştir..." Style="{StaticResource SecondaryButtonStyle}" Click="ChangeFolder_Click" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Kiosk Ekranı" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                    <TextBlock Text="Tam ekran yayının hangi ekranda açılacağını seçin (çoklu monitör/uzatılmış ekran senaryosu)." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,10" />
+                    <ComboBox x:Name="MonitorCombo" SelectedValuePath="DeviceName" SelectionChanged="MonitorCombo_SelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Label}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Başlangıç" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                    <CheckBox x:Name="AutoStartCheck" Content="Windows açılışında otomatik başlat" Margin="0,4,0,8" Checked="AutoStartCheck_Changed" Unchecked="AutoStartCheck_Changed" />
+                    <TextBlock Text="Bu bilgisayar nasıl başlasın?" Style="{StaticResource MutedTextStyle}" Margin="0,4,0,6" />
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="KioskRadio" Content="Yayın (Kiosk)" GroupName="StartupMode" Margin="0,0,20,0" Checked="StartupMode_Changed" />
+                        <RadioButton x:Name="ManagementRadio" Content="Yönetim" GroupName="StartupMode" Checked="StartupMode_Changed" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Görünüm" Style="{StaticResource HeadingStyle}" Margin="0,0,0,8" />
+                    <StackPanel x:Name="ThemeSwatchPanel" Orientation="Horizontal" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Yönetici Şifresi" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                    <TextBlock Text="Yönetim işlemlerini (şablon düzenleme, tam ekrandan çıkış) korur." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,10" />
+                    <Button x:Name="AdminPasswordButton" Content="Şifre Belirle / Değiştir" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Left" Click="AdminPassword_Click" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,70 @@
+<UserControl x:Class="OkulPanosu.App.Views.ClassSchedulesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="24" Background="{StaticResource BgPrimaryBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="📚 Sınıf Ders Programı" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+            <Button x:Name="SaveButton" Grid.Column="1" Content="Kaydet" Style="{StaticResource PrimaryButtonStyle}" Click="Save_Click" />
+        </Grid>
+        <TextBlock Grid.Row="0" Text="Ders saatleri 'Ders &amp; Zil Saatleri' sayfasından tanımlanır — burada her sınıfın hangi periyotta hangi dersi olduğu girilir."
+                   Style="{StaticResource MutedTextStyle}" Margin="0,32,0,0" VerticalAlignment="Bottom" TextWrapping="Wrap" />
+
+        <TextBlock Grid.Row="1" x:Name="StatusText" Foreground="{StaticResource SuccessBrush}" Margin="0,10,0,0"
+                   TextWrapping="Wrap" Visibility="Collapsed" />
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,16,0,14">
+            <StackPanel>
+                <TextBlock Text="Sınıflar" Style="{StaticResource HeadingStyle}" Margin="0,0,0,8" />
+                <StackPanel x:Name="NewClassForm" Orientation="Horizontal" />
+                <ItemsControl x:Name="ClassChips" Margin="0,12,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock x:Name="EmptyText" Style="{StaticResource MutedTextStyle}"
+                           Text="Düzenlemek için yukarıdan bir sınıf seçin veya yeni bir sınıf ekleyin." />
+                <TextBlock x:Name="SelectedClassHeader" Style="{StaticResource HeadingStyle}" Margin="0,0,0,10" Visibility="Collapsed" />
+
+                <Border x:Name="PasteCard" Style="{StaticResource CardStyle}" Margin="0,0,0,14" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Excel'den Yapıştır" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                        <TextBlock TextWrapping="Wrap" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,8">
+                            Excel'deki haftalık programı (gün başlıklarıyla birlikte ya da onlarsız, satır
+                            sırası her zaman periyot 1'den başlamalı) kopyalayıp buraya yapıştırın. Gün
+                            başlıkları varsa sütun sırası önemli değildir, hangi sütunun hangi güne ait
+                            olduğu başlıktan okunur. Bir hücrede "Ders - Öğretmen" ya da ders adının ALTINA
+                            (Alt+Enter ile) öğretmen kısaltması yazılmışsa, kısaltma Personel listesindeki
+                            tam adla eşleştirilmeye çalışılır — eşleşmezse yazdığınız gibi kaydedilir.
+                        </TextBlock>
+                        <TextBox x:Name="PasteBox" Style="{StaticResource WatermarkTextBoxStyle}" AcceptsReturn="True"
+                                 AcceptsTab="True" TextWrapping="NoWrap" Height="90"
+                                 FontFamily="Consolas" FontSize="12"
+                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+                        <Button Content="Yapıştırılanı Uygula" Style="{StaticResource SecondaryButtonStyle}"
+                                HorizontalAlignment="Left" Margin="0,8,0,0" Click="ApplyPaste_Click" />
+                    </StackPanel>
+                </Border>
+
+                <Grid x:Name="MatrixGrid" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,26 @@
+<Window x:Class="OkulPanosu.App.Views.BoardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:modules="clr-namespace:OkulPanosu.App.Views.Modules"
+        Title="Okul Panosu" Icon="/Assets/AppIcon.ico" WindowStartupLocation="Manual"
+        PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing">
+    <Grid>
+        <modules:BoardGridControl x:Name="BoardGrid" />
+
+        <!--
+            Acil çıkış köşesi — Ctrl+Alt+Y'nin (artık global kısayol olsa da) ulaşamayabileceği durumlar
+            için (ör. klavyesiz/dokunmatik kiosk) fareyle HER ZAMAN çalışan bir yedek. Sabit köşeye
+            hizalı olduğu için çözünürlük hesabı gerekmez. Normalde tamamen görünmez, fare üzerine
+            gelince belirginleşir.
+        -->
+        <Border Width="70" Height="70" HorizontalAlignment="Right" VerticalAlignment="Top"
+                Background="Transparent" Cursor="Hand" ToolTip="Yönetime dön"
+                MouseEnter="ExitCorner_MouseEnter" MouseLeave="ExitCorner_MouseLeave"
+                MouseLeftButtonUp="ExitCorner_Click">
+            <Border x:Name="ExitCornerIcon" CornerRadius="0,0,0,12" Background="#CC111827" Opacity="0"
+                    Padding="10,8">
+                <TextBlock Text="Yönetim" FontSize="12" FontWeight="Bold" Foreground="White" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="60" />
+            </Border>
+        </Border>
+    </Grid>
+</Window>

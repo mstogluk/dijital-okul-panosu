@@ -1,0 +1,24 @@
+<UserControl x:Class="OkulPanosu.App.Views.Modules.FoodMenuModuleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Padding="14">
+        <DockPanel>
+            <TextBlock Text="🍲 Günün Yemek Menüsü" DockPanel.Dock="Top" Style="{StaticResource HeadingStyle}"
+                       HorizontalAlignment="Center" Margin="0,0,0,10" />
+
+            <TextBlock x:Name="CaloriesText" DockPanel.Dock="Bottom" Style="{StaticResource MutedTextStyle}"
+                       HorizontalAlignment="Center" Margin="0,8,0,0" Visibility="Collapsed" />
+
+            <TextBlock x:Name="EmptyText" Style="{StaticResource MutedTextStyle}" FontSize="16"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+
+            <ItemsControl x:Name="ItemsList" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="17" HorizontalAlignment="Center" Margin="0,3" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DockPanel>
+    </Border>
+</UserControl>

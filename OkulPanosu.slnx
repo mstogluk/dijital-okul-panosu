@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OkulPanosu.App/OkulPanosu.App.csproj" />
+    <Project Path="src/OkulPanosu.Core/OkulPanosu.Core.csproj" />
+  </Folder>
+</Solution>

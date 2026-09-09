@@ -1,0 +1,116 @@
+<UserControl x:Class="OkulPanosu.App.Views.TemplateEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:modules="clr-namespace:OkulPanosu.App.Views.Modules">
+    <Grid Margin="24" Background="{StaticResource BgPrimaryBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="← Şablonlara Dön" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,14,0" Click="Back_Click" />
+                <TextBlock x:Name="TitleText" Text="Düzen Editörü" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="PreviewButton" Content="Önizle" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Click="Preview_Click" />
+                <Button Content="Kaydet" Style="{StaticResource PrimaryButtonStyle}" Click="Save_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="EditorPanelColumn" Width="420" MinWidth="0" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer x:Name="EditorPanelScroll" Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Izgara Boyutu" Style="{StaticResource HeadingStyle}" Margin="0,0,0,8" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Sütun Sayısı" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,4" />
+                                    <TextBox x:Name="GridColumnsBox" Style="{StaticResource WatermarkTextBoxStyle}" LostFocus="GridSize_Changed" KeyDown="GridSize_KeyDown" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Satır Sayısı" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,4" />
+                                    <TextBox x:Name="GridRowsBox" Style="{StaticResource WatermarkTextBoxStyle}" LostFocus="GridSize_Changed" KeyDown="GridSize_KeyDown" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="CanvasSizeText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,10,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Kayan Duyuru (Ticker)" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                            <TextBlock Text="Panonun en altında sabit bir şerit olarak gösterilir, ızgaradaki modüllerden bağımsızdır." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                            <TextBox x:Name="TickerTextBox" Style="{StaticResource WatermarkTextBoxStyle}" AcceptsReturn="True" TextWrapping="Wrap" Height="60" LostFocus="TickerFields_Changed" />
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Hız (sn/tur)" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,4" />
+                                    <TextBox x:Name="TickerSpeedBox" Style="{StaticResource WatermarkTextBoxStyle}" LostFocus="TickerFields_Changed" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Görünüm Modu" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                            <TextBlock Text="Bu şablon yayına alındığında panonun taban rengi — Yönetim arayüzünün kendi teması bundan etkilenmez." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                            <ContentControl x:Name="ColorModeComboHost" Margin="0,0,0,8" />
+                            <StackPanel x:Name="CustomColorPanel" Orientation="Horizontal" Visibility="Collapsed">
+                                <Border x:Name="CustomColorSwatch" Width="34" Height="34" CornerRadius="8"
+                                        BorderThickness="1" BorderBrush="{StaticResource BorderBrush1}"
+                                        Cursor="Hand" MouseLeftButtonDown="PickCustomColor_Click" Margin="0,0,10,0" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="CustomColorHexText" FontFamily="Consolas" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBlock Text="Renk kutusuna tıklayarak değiştirin" Style="{StaticResource MutedTextStyle}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="🧩 Modül Ekleme Havuzu" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
+                    <TextBlock Text="Yayına almak istediğiniz modüle tıklayarak panoya anında ekleyin." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,10" />
+                    <ItemsControl x:Name="ModulePalette" Margin="0,0,0,12" />
+
+                    <TextBlock Text="Panodaki modüle tıklayıp seçin, yön tuşlarıyla taşıyın, Shift+yön tuşlarıyla boyutlandırın. ⚙️ ayarları açar, 🗑 siler." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                    <TextBlock Text="Nöbet çizelgesi, duyurular, yemek menüsü gibi paylaşılan içerikler artık soldaki menüdeki 'İçerikler' sayfasından düzenleniyor." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <Border Grid.Column="1" Background="{StaticResource BgPrimaryBrush}" />
+            <GridSplitter Grid.Column="1" Width="14" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          Background="{StaticResource BgPrimaryBrush}" Focusable="False" />
+            <Button Grid.Column="1" x:Name="ToggleEditorPanelButton" Content="◀" Width="14" Height="36" Padding="0"
+                    VerticalAlignment="Top" Style="{StaticResource SecondaryButtonStyle}"
+                    Click="ToggleEditorPanel_Click" ToolTip="Paneli daralt/genişlet" />
+
+            <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <modules:BoardGridControl x:Name="PreviewGrid" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
