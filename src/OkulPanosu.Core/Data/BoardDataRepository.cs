@@ -105,6 +105,20 @@ public sealed class BoardDataRepository(string dataFolderPath)
         data.Templates.Add(template);
         data.ActiveTemplateId = template.Id;
         Save(data);
+
+        WriteDefaultTemplateBackup(template);
+    }
+
+    /// <summary>İlk kurulumda oluşturulan Ana Şablon'u, Şablonlar sayfasındaki "Dışa Aktar" ile aynı
+    /// JSON biçiminde Şablonlar klasörüne de yazar — kullanıcı panodaki Ana Şablon'u yanlışlıkla bozar/
+    /// silerse, "İçe Aktar" ile buradan geri getirebilir; ayrı bir yedek dosyası taşımasına gerek kalmaz.</summary>
+    private void WriteDefaultTemplateBackup(Template template)
+    {
+        var backupPath = Path.Combine(TemplatesFolderPath, $"{template.Name}_şablonu_yedek.json");
+        if (File.Exists(backupPath)) return;
+
+        var dto = new { ExportedAt = DateTimeOffset.Now, Template = template };
+        File.WriteAllText(backupPath, JsonSerializer.Serialize(dto, JsonOptions));
     }
 
     /// <summary>Veri klasöründe henüz hiç ders periyodu yoksa (ilk kurulum, ya da kullanıcı "Ders & Zil
