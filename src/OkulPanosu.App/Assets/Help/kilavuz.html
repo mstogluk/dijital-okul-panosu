@@ -394,6 +394,20 @@
           <li>Seçili modülün sağ alt köşesindeki tutamaçla fareyle de boyutlandırabilirsiniz.</li>
           <li>Başlık çubuğundaki dişli simgesi ayarları, çöp kutusu silmeyi açar (silme yönetici şifresi ister).</li>
         </ul>
+        <h3>İlk Kurulumda Hazır Gelen "Ana Şablon"</h3>
+        <p>Veri klasörü ilk kez seçildiğinde (sihirbaz ya da Ayarlar → "Veri Klasörünü Değiştir") ve o klasörde
+        henüz hiç şablon yoksa, uygulama tüm modülleri kullanan hazır bir <strong>"Ana Şablon"</strong> oluşturup
+        otomatik yayına alır — sıfırdan boş bir ekranla başlamak zorunda kalmazsınız, sadece içerikleri
+        (Duyurular, Personel, Yemek Menüsü vb.) kendi okulunuza göre doldurmanız yeterlidir.</p>
+        <p>Aynı anda, bu hazır şablonun bir yedeği <code>{Veri Klasörü}\Şablonlar\Ana Şablon_şablonu_yedek.json</code>
+        dosyası olarak da kaydedilir. Bunu şu durumlarda kullanabilirsiniz:</p>
+        <ul>
+          <li>Ana Şablon'u düzenlerken yanlışlıkla bozarsanız/silerseniz, Şablonlar sayfasındaki
+          <strong>"İçe Aktar"</strong> butonuyla bu dosyayı seçip orijinal düzeni yeni bir şablon olarak geri
+          getirebilirsiniz.</li>
+          <li>Farklı bir şablon üzerinde çalışırken hazır düzene tekrar dönmek isterseniz, yine aynı yoldan
+          (İçe Aktar → bu dosyayı seçin) Ana Şablon'u tekrar ekleyebilirsiniz.</li>
+        </ul>
         <h3>Kayan Duyuru ve Okul Adı</h3>
         <p>Panonun altındaki kayan yazı bir modül değil, şablonun kendi özelliğidir. Ayarlar → Kurum Bilgileri'nde
         okul adı girilirse panonun en üstünde sabit bir başlık şeridi görünür; boşsa hiç gösterilmez.</p>
@@ -863,6 +877,13 @@
           <p class="a" style="margin-top:8px;"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Y</kbd> kısayolu da aynı işi
           (tam ekrandan çıkış/giriş) yapar, ama pencerenin odakta olmasını gerektirdiği için pratikte tepsi
           simgesi + buton kadar kullanışlı değildir — yine de yedek bir yöntem olarak durur.</p>
+        </div>
+
+        <div class="faq-item">
+          <p class="q">İlk kurulumda gelen hazır "Ana Şablon"u kaybettim, nasıl geri getiririm?</p>
+          <p class="a">Veri klasörünüzdeki <code>Şablonlar</code> alt klasöründe otomatik bırakılmış bir yedek
+          vardır (<code>Ana Şablon_şablonu_yedek.json</code>). Şablonlar sayfasında <strong>"İçe Aktar"</strong>a
+          basıp bu dosyayı seçmeniz, orijinal düzeni yeni bir şablon olarak geri getirir.</p>
         </div>
 
         <footer class="page-footer">Okul Panosu — Dijital Okul Bilgi Panosu.</footer>
