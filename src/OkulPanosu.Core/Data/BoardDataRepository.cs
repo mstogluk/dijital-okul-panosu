@@ -74,8 +74,8 @@ public sealed class BoardDataRepository(string dataFolderPath)
 
         var template = new Template
         {
-            Name = "Ana Pano Düzeni (1920×1080)",
-            Description = "Saat/Tarih, Nöbetçi Öğretmen, Duyurular, Ayın Öğrencisi, Yerel Video, Tarihte Bugün, Haftanın Beyin Egzersizi, Okulumuzdan Kareler, Yemek Menüsü, Doğum Günleri, Haftanın Temiz Sınıfları ve Ders Saatleri modüllerini içeren, 1920×1080 ekran için hazırlanmış tam düzen.",
+            Name = "Ana Şablon",
+            Description = "",
             IsActive = true,
             GridColumns = 50,
             GridRows = 50,
@@ -83,20 +83,22 @@ public sealed class BoardDataRepository(string dataFolderPath)
             TickerSpeed = 30,
             TickerBgColor = "#1e3a8a",
             TickerTextColor = "#ffffff",
+            ColorMode = "custom",
+            CustomBaseColor = "#7CABE4",
             Modules =
             [
-                new BoardModule { Type = "announcements", Title = "Duyurular", X = 0, Y = 0, W = 16, H = 19, ThemeColor = "Amber", Settings = new() { ["transitionSeconds"] = "8", ["imageLayout"] = "side" } },
-                new BoardModule { Type = "cleanest_class", Title = "Haftanın Temiz Sınıfları", X = 0, Y = 19, W = 8, H = 11, ThemeColor = "Blue", Settings = new() { ["transitionSeconds"] = "6" } },
-                new BoardModule { Type = "weekly_question", Title = "Haftanın Beyin Egzersizi", X = 8, Y = 19, W = 8, H = 11, ThemeColor = "Rose" },
-                new BoardModule { Type = "school_gallery", Title = "Okulumuzdan Kareler", X = 0, Y = 30, W = 16, H = 20, ThemeColor = "Blue", Settings = new() { ["transitionSeconds"] = "6" } },
-                new BoardModule { Type = "clock_date", Title = "Saat & Tarih", X = 16, Y = 0, W = 10, H = 12, ThemeColor = "Blue" },
-                new BoardModule { Type = "today_in_history", Title = "Tarihte Bugün", X = 16, Y = 12, W = 10, H = 11, ThemeColor = "Sky" },
-                new BoardModule { Type = "duty_teacher", Title = "Nöbetçi Öğretmen", X = 16, Y = 23, W = 13, H = 27, ThemeColor = "Indigo" },
-                new BoardModule { Type = "student_of_month", Title = "Ayın Öğrencisi", X = 26, Y = 0, W = 8, H = 23, ThemeColor = "Violet" },
-                new BoardModule { Type = "video", Title = "Yerel Video", X = 34, Y = 0, W = 16, H = 23, ThemeColor = "Emerald" },
-                new BoardModule { Type = "birthdays", Title = "Doğum Günleri", X = 29, Y = 23, W = 9, H = 13, ThemeColor = "Blue" },
-                new BoardModule { Type = "food_menu", Title = "Yemek Menüsü", X = 29, Y = 36, W = 9, H = 14, ThemeColor = "Blue" },
-                new BoardModule { Type = "schedule", Title = "Ders & Teneffüs Saatleri", X = 38, Y = 23, W = 12, H = 27, ThemeColor = "Blue" },
+                new BoardModule { Type = "clock_date", Title = "Saat & Tarih", X = 0, Y = 0, W = 9, H = 12, ThemeColor = "Blue" },
+                new BoardModule { Type = "duty_teacher", Title = "Nöbetçi Öğretmen", X = 13, Y = 21, W = 13, H = 29, ThemeColor = "Indigo", Settings = new() { ["transitionSeconds"] = "6", ["dutyLocationLayout"] = "right" } },
+                new BoardModule { Type = "video", Title = "Yerel Video", X = 34, Y = 0, W = 16, H = 21, ThemeColor = "Emerald" },
+                new BoardModule { Type = "today_in_history", Title = "Tarihte Bugün", X = 0, Y = 12, W = 9, H = 9, ThemeColor = "Sky", Settings = new() { ["transitionSeconds"] = "8" } },
+                new BoardModule { Type = "student_of_month", Title = "Ayın Öğrencisi", X = 26, Y = 0, W = 8, H = 21, ThemeColor = "Violet" },
+                new BoardModule { Type = "announcements", Title = "Duyurular", X = 9, Y = 0, W = 17, H = 21, ThemeColor = "Amber", Settings = new() { ["transitionSeconds"] = "8", ["imageLayout"] = "side" } },
+                new BoardModule { Type = "weekly_question", Title = "Haftanın Beyin Egzersizi", X = 26, Y = 33, W = 12, H = 17, ThemeColor = "Rose" },
+                new BoardModule { Type = "school_gallery", Title = "Okulumuzdan Kareler", X = 0, Y = 32, W = 13, H = 18, ThemeColor = "Blue", Settings = new() { ["transitionSeconds"] = "6" } },
+                new BoardModule { Type = "food_menu", Title = "Yemek Menüsü", X = 26, Y = 21, W = 12, H = 12, ThemeColor = "Blue" },
+                new BoardModule { Type = "birthdays", Title = "Doğum Günleri", X = 6, Y = 21, W = 7, H = 11, ThemeColor = "Blue" },
+                new BoardModule { Type = "cleanest_class", Title = "Haftanın Temiz Sınıfları", X = 0, Y = 21, W = 6, H = 11, ThemeColor = "Blue", Settings = new() { ["transitionSeconds"] = "6" } },
+                new BoardModule { Type = "schedule", Title = "Ders & Teneffüs Saatleri", X = 38, Y = 21, W = 12, H = 29, ThemeColor = "Blue" },
             ],
         };
 
