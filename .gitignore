@@ -2,6 +2,7 @@ bin/
 obj/
 .vs/
 publish/
+Release/
 YAYIN/
 *.user
 .claude/settings.local.json
