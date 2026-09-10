@@ -2290,3 +2290,73 @@ modülleri çoklu-örnek, "Ad Değiştir" butonu, editördeki sığmama/diyalog 
 butonlarına ortak onay, Okulumuzdan Kareler çökme düzeltmesi, Ders & Teneffüs TENEFFÜS gölgelemesi,
 Tarihte Bugün Gün/Ay alanları, Beyin Egzersizi "Soru" kutusu, Nöbetçi Öğretmen nöbet yeri yerleşimi +
 branş metni — de henüz kullanıcı onayı bekliyor).
+
+## 2026-09-10 — Okullar açıldı, okul PC'sinden devam
+
+**Proje artık askıda DEĞİL** — yukarıdaki "askıya alıyorum" notu geçerliliğini yitirdi, okullar açıldı,
+kullanıcı şu an fiilen okulda (sistem odası + idare PC'si) çalışıyor. Öğrenciler bu haftanın pazartesi günü
+başlıyor, kullanıcının hazırlık için 2 iş günü vardı.
+
+**Okul PC'si (idare PC'si, kullanıcı adı `DELLENDIM\Selim`) ortamı sıfırdan kuruldu:**
+- Ne Git ne .NET SDK kuruluydu — ikisi de `winget` ile kuruldu (Git.Git, Microsoft.DotNet.SDK.10 → 10.0.401).
+  PowerShell komutları arasında `$env:Path` kalıcı olmuyor, her komutta Machine+User PATH'i yeniden
+  birleştirmek gerekiyor.
+- Proje klasörü (`D:\MYPRG\CLAUDE\Dijital Okul Panosu`) zaten evden git deposu olarak (elle/harici diskle)
+  taşınmıştı, `origin` (github.com/mstogluk/dijital-okul-panosu) zaten tanımlıydı — GitHub Desktop kurup ayrı
+  bir klon almaya gerek kalmadı (kullanıcı bir ara denedi, sonra kendisi sildi, doğru karardı).
+
+**Paylaşılan veri klasörüne (`\\sistemodasi\ortak\YAYIN`, bu PC'de `Z:\YAYIN`) yazma erişimi "Veri Klasörüne
+Ulaşılamıyor" hatası veriyordu — kök neden ağ/bağlantı DEĞİL, NTFS izniydi:**
+- `crash.log`'da gerçek istisna `UnauthorizedAccessException: Access to the path 'Z:\YAYIN\board-data.json.tmp'
+  is denied` idi (uygulamanın "Veri Klasörüne Ulaşılamıyor" mesajı hem ağ-erişilemezliği hem izin-reddini AYNI
+  genel metinle gösteriyor — ileride ayrı mesaja çevrilebilir, şimdilik dokunulmadı).
+  Doğrudan PowerShell'den de aynı klasöre yazma denendi, aynı hata alındı — uygulamadan bağımsız, gerçek bir
+  Windows/paylaşım izni sorunu olduğu böyle doğrulandı.
+- Kullanıcı yaz tatilinde birinin sistem odası PC'sine dokunmuş olabileceğini hatırladı: paylaşım "ortak"
+  isimli ortak kullanıcı + Users grubuna salt-okunur (read-only) çevrilmişti. Kullanıcı kendisi sunucudaki
+  paylaşım/NTFS izinlerini düzeltti (Değiştirme iznini geri açtı) — **artık çalışıyor, doğrulandı.**
+  Not: NTFS izin düzenleme penceresini paylaşımın KÖKÜNDE (`Z:\`) değil, doğrudan `YAYIN` alt klasöründe
+  açmak "Kapsayıcıdaki nesneler numaralandırılamadı" hatasını önlüyor (kök, izinleri kısıtlı başka alt
+  klasörler — GENEL/KİŞİSEL — içeriyor olabilir).
+
+**Ana Şablon artık kodla senkron — büyük bir tutarsızlık giderildi:**
+- Kullanıcı fark etti: `BoardDataRepository.EnsureDefaultTemplate()` (yeni kurulumda otomatik oluşan
+  varsayılan şablon) ile kullanıcının panoda fiilen düzenlediği "Ana Şablon" birbirinden TAMAMEN
+  bağımsızdı — biri koda gömülü sabit, diğeri paylaşılan JSON'da. Başka bir okula sıfırdan publish
+  verilseydi, kullanıcının emek verdiği güncel düzen değil eski/dondurulmuş kod düzeni çıkardı.
+- **Düzeltme:** `EnsureDefaultTemplate()` artık kullanıcının gerçek "Ana Şablon"uyla BİREBİR eşleşiyor
+  (12 modül, aynı X/Y/W/H, `ColorMode=custom`/`CustomBaseColor=#7CABE4`) — TEK fark, kayan duyuru metni:
+  gerçek Ana Şablon'daki metin bu okula özeldi (Batman Mezopotamya...), koda genel bir yer tutucu
+  ("Okul Dijital Panosu Yayınıdır.") gömüldü, başka okul kendi metnini kolayca girer.
+  Kullanıcı "Ana Şablon bozulmasın" dediği için üzerinde deneme yapmak yerine bir KOPYASINI ("Mezopotamya
+  Ana Şablon") oluşturup onun üzerinde çalışmaya karar verdi — Ana Şablon artık hem panoda hem kodda sabit
+  referans.
+- **Ek olarak:** `EnsureDefaultTemplate()` artık aynı düzeni `{VeriKlasörü}\Şablonlar\Ana Şablon_şablonu_yedek.json`
+  olarak da (TemplateExportService'in "Dışa Aktar" ürettiğiyle AYNI JSON biçiminde) otomatik yazıyor
+  (`WriteDefaultTemplateBackup`) — kullanıcı panodaki Ana Şablon'u kazayla bozarsa/silerse, Şablonlar
+  sayfasındaki "İçe Aktar" ile bu dosyadan geri getirebilir; ayrı bir yedek dosyası taşımasına/göndermesine
+  gerek kalmadı. Kılavuza (hem uygulama içi hem web, aynı URL:
+  <https://claude.ai/code/artifact/f261d410-4ad4-483a-9753-597fd87a04e1>) bu özellik belgelendi (Şablonlar
+  sayfasına yeni alt başlık + SSS'ye yeni madde).
+- **"+ Yeni Şablon" kasıtlı olarak BOŞ açılmaya devam ediyor** (değişiklik YAPILMADI) — "Kopyala" zaten var
+  olan bir düzenden başlamak için, "Yeni" temiz sayfa için; ikisini birleştirmek kafa karıştırırdı.
+
+**Git push akışı — bu makineden otomatik push GÜVENİLİR DEĞİL:**
+- GCM (Git Credential Manager, `credential.helper=manager`) kurulu, ama bu oturumdaki (Claude Code'un
+  PowerShell aracından, non-interactive/stdin=null ortamda) tetiklenen `git push` denemeleri kimlik
+  doğrulamasını tamamlayamadı ("terminal prompts disabled" ya da sessizce sonsuza kadar askıda kaldı) —
+  hem doğrudan `git push` hem `github_gonder.bat` üzerinden denendi, ikisi de aynı şekilde takıldı.
+  **Ders: bu makinede push'u HER ZAMAN kullanıcının kendi (interaktif) terminalinden/bat dosyasından
+  yaptırmak gerekiyor, otomatik çalıştırmayı denemeye devam etmemeli.**
+- Kullanıcı `github_gonder.bat`'ı kendisi çalıştırdığında push çalışıyor ama BAZEN ÇOK YAVAŞ olabiliyor
+  (bir seferinde 91 nesne/birkaç MB, okul ağının kısıtlı giden bant genişliğiyle dakikalarca sürebiliyor)
+  — bu normal, "Writing objects: %N" ilerlemesi duruyorsa (yüzde artıyorsa) beklemek yeterli, müdahale
+  gerekmiyor.
+- Bu tur sonunda GitHub'a gönderilmesi gereken commit'ler: Ana Şablon kod eşleşmesi, otomatik yedek
+  özelliği, kılavuz güncellemesi (bkz. yukarısı) — push'un fiilen tamamlanıp tamamlanmadığı bir sonraki
+  oturumda `git status`/`git log origin/main..HEAD` ile doğrulanmalı.
+
+**Sırada:** Kullanıcı idareden ders programı + nöbetçi öğretmen listesi beklerken, buna bağlı olmayan diğer
+modülleri (Duyurular, Personel, Yemek Menüsü, Ayın Öğrencisi, Yerel Video, Beyin Egzersizi, Temiz Sınıflar,
+Öğrenciler) dolduruyor ve TV'de gerçek yayın denemesi yapıyor — kod tarafında şu an bekleyen bir iş yok,
+bir sonraki oturumda kullanıcıya doğrudan "yayın denemesi nasıl gitti, bir sorun çıktı mı?" diye sorulabilir.
