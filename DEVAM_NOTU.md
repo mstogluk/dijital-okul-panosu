@@ -2219,13 +2219,45 @@ BUILD + gerçek bir ShutdownMode hatası bulundu:**
   PC'si kapalıyken artık net bir uyarı gösterip normal şekilde açılıyor, erken kapanma yok. Bu konu
   ÇÖZÜLDÜ sayılabilir — tekrar açılmadıkça buna dönmeye gerek yok.
 
+## Proje artık GitHub'da (kullanıcı iki farklı PC'de çalışıyor)
+
+`https://github.com/mstogluk/dijital-okul-panosu` — kullanıcı bazen bu PC'de, bazen okuldaki PC'de
+çalışıyor; senkronizasyon için `github_gonder.bat` (add+commit+push) ve `github_al.bat` (pull) proje
+kökünde. **Önemli:** `.gitignore`'da `bin/`, `obj/`, `.vs/`, `publish/`, `Release/`, `YAYIN/` hariç
+tutuluyor — yeni bir build-output klasörü (farklı bir isimle, ör. `dotnet publish -o BaskaBirIsim`)
+oluşursa bu da gitignore'a eklenmeli, yoksa `github_gonder.bat` onu da commit'e dahil eder (elli ikinci
+oturumda `Release\` klasörü — 79MB self-contained publish çıktısı — yanlışlıkla commit'lenmiş, fark
+edilip temizlendi).
+
+**Altmış üçüncü tur — Okuldaki PC'de yapılan 3 commit, bu PC'ye pull edildi (kullanıcının "DEVAM_NOTU.md'ye
+kaydettik" dediği not GERÇEKTE push'lanmamış — bu turdaki özet, git diff'ten yeniden oluşturuldu):**
+- **Ana Şablon sadeleştirildi ve kullanıcının GERÇEK kullandığı yerleşimle eşleştirildi:** İlk kurulumda
+  otomatik oluşturulan varsayılan şablonun adı "Ana Pano Düzeni (1920×1080)"'dan sade **"Ana Şablon"**'a
+  çevrildi, açıklama boşaltıldı, `ColorMode="custom"` + `CustomBaseColor="#7CABE4"` eklendi, TÜM
+  modüllerin X/Y/W/H konumları kullanıcının okulda fiilen kullandığı düzenle eşleşecek şekilde
+  güncellendi (`BoardDataRepository.EnsureDefaultTemplate`).
+- **Ana Şablon'un otomatik yedeği eklendi:** Yeni `WriteDefaultTemplateBackup` metodu, ilk kurulumda
+  oluşturulan Ana Şablon'u `{Veri Klasörü}\Şablonlar\Ana Şablon_şablonu_yedek.json` olarak da yazıyor —
+  kullanıcı Ana Şablon'u yanlışlıkla bozar/silerse, Şablonlar sayfasındaki "İçe Aktar" ile bu dosyadan
+  geri getirebiliyor (ayrı bir yedekleme adımına gerek kalmadan).
+- Kılavuz (uygulama içi, `kilavuz.html`) buna göre güncellendi: "İlk Kurulumda Hazır Gelen 'Ana Şablon'"
+  başlığı + "Ana Şablon'u kaybettim, nasıl geri getiririm?" SSS maddesi eklendi. **NOT: web artifact
+  (`https://claude.ai/code/artifact/f261d410-...`) bu turda güncellenmedi** — okuldaki oturumun web
+  kılavuzuna erişimi/bilgisi olmayabilir, kontrol edip senkronize etmek gerekebilir.
+- Derleme (bu PC'de, pull sonrası): 0 hata, 0 uyarı.
+- **Kullanıcıya sorulmalı:** DEVAM_NOTU.md'yi okuldaki oturumda gerçekten güncelleyip güncellemediğini
+  (kendi ifadesiyle güncellemiş ama push edilmemiş) — belki sadece commit edilmiş push edilmemiş bir
+  hâli okuldaki PC'de duruyordur, ya da hiç kaydedilmemiştir. Ayrıca web kılavuzunun da güncellenip
+  güncellenmediği teyit edilmeli.
+
 ## Yeni Oturumda İlk Yapılacak
 
 Bu dosyayı okuduktan sonra, kullanıcıya doğrudan "hangi adımı denediniz, ne oldu?" diye sorarak devam
 edilebilir — kod tarafında bekleyen bir iş yok, sıradaki adım kullanıcının manuel test geri bildirimi
 (proje şu an askıda, yukarıdaki nota bakın). **ÖNEMLİ:** Bu makinenin veri klasörü artık
 `Z:\DijitalOkulPanosu\YAYIN` (laptopun GERÇEK canlı verisi, ağ paylaşımı üzerinden) — yukarıdaki
-"ÖNEMLİ — Ortam/veri klasörü değişikliği" notuna bakın.
+"ÖNEMLİ — Ortam/veri klasörü değişikliği" notuna bakın. Proje artık GitHub'da — yeni oturuma başlamadan
+önce `github_al.bat` ile (ya da `git pull`) en güncel hâli çektiğinden emin ol.
 
 **"Veri Klasörüne Ulaşılamıyor" konusu ÇÖZÜLDÜ ve DOĞRULANDI** (altmış ikinci tur — kullanıcı
 `publish\OkulPanosu.App.exe`'yi test edip "şimdi iyi çalışıyor" dedi). Tekrar bir sorun bildirilmedikçe
