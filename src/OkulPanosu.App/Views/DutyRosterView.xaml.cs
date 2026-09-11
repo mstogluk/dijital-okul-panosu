@@ -227,6 +227,8 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             suppress = true;
             onSelected(selected == placeholder ? null : selected);
             combo.ItemsSource = FullList();
+            combo.SelectedItem = selected;
+            combo.Text = selected; // ItemsSource sıfırlanınca WPF görünen metni bazen boşaltıyor - açıkça geri yaz.
             combo.IsDropDownOpen = false;
             suppress = false;
         };
