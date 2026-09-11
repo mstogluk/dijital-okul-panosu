@@ -2392,3 +2392,68 @@ Ulaşılamıyor" hatası veriyordu — kök neden ağ/bağlantı DEĞİL, NTFS i
 modülleri (Duyurular, Personel, Yemek Menüsü, Ayın Öğrencisi, Yerel Video, Beyin Egzersizi, Temiz Sınıflar,
 Öğrenciler) dolduruyor ve TV'de gerçek yayın denemesi yapıyor — kod tarafında şu an bekleyen bir iş yok,
 bir sonraki oturumda kullanıcıya doğrudan "yayın denemesi nasıl gitti, bir sorun çıktı mı?" diye sorulabilir.
+
+## 2026-09-11 — Nöbet Çizelgesi: gerçek veriyle bulunan hatalar + idare formatı desteği
+
+**Kök neden bulundu — Personel toplu aktarımında kategori tespiti yanlış çalışıyordu:** Kullanıcı gerçek
+okul verisini (45 personel) idareden aldığı Excel listesiyle toplu aktardıktan sonra Nöbet Çizelgesi'ndeki
+"+ Öğretmen" listesi tamamen BOŞ geldi. Kök neden: e-Okul tarzı dışa aktarımlarda "Görev" sütunu öğretmenler
+için literal "Öğretmen" değil, doğrudan **branş adını** ("Matematik", "İngilizce" vb.) içeriyor — eski kod
+"Görev metninde 'öğretmen' geçmiyorsa Diğer Personel" mantığıyla çalıştığı için 45 kişinin 39'u (gerçek
+öğretmenler) yanlışlıkla "staff" kategorisine düşmüştü (sadece 6 gerçek idareci doğruydu).
+- **Mevcut veri** bir kerelik düzeltme scriptiyle (BoardDataRepository'yi doğrudan kullanan, geçici bir
+  konsol projesiyle — JSON'u elle parse edip bozma riskine girmeden) onarıldı: 39 kişi `teacher`e taşındı,
+  branş bilgisi Title'dan Branch'e geçirildi, Title "Öğretmen" yapıldı.
+- **Kod** (`PersonnelView.xaml.cs`, `BulkImport_Click`/`IsNonTeachingTitle`) kalıcı olarak düzeltildi:
+  kategori artık varsayılan olarak `teacher`, SADECE bilinen idari/destek kadrosu anahtar kelimeleri
+  (müdür, memur, hizmetli, sekreter, güvenlik, temizlik, şoför, aşçı, teknisyen, bekçi) geçerse `staff`
+  sayılıyor — bir sonraki toplu aktarımda aynı hata tekrarlanmayacak.
+
+**Nöbet Çizelgesi'ne (`DutyRosterView`) üç iyileştirme daha yapıldı (hepsi gerçek kullanıcı geri
+bildirimiyle, aynı oturumda):**
+1. **Sıralama + arama:** Hem Müdür Yrd. hem "+ Öğretmen" seçicileri artık alfabetik sıralı ve yazarak
+   filtrelenebiliyor (`SearchableNameCombo` — `IsEditable` ComboBox + `TextBoxBase.TextChangedEvent`
+   üzerinden canlı filtre, WPF'in yerleşik `IsTextSearchEnabled`i KAPALI çünkü kendi filtremizle çakışıyordu).
+2. **İdare formatında yapıştırma:** Okul idaresinin gönderdiği gerçek çizelge PDF'i bizim tablomuzun TERSİNE
+   dizilmiş (satır=gün, sütun=nöbet yeri, isimler "E.BAKIR" gibi kısaltma). Yeni "Yapıştırılanı Uygula"
+   kutusu bu düzeni doğrudan okuyor — başlık satırından nöbet yeri/Müdür Yrd. sütunlarını (`MatchFloorHeader`
+   — kat numarası regex ile, bahçe/zemin anahtar kelimeyle; `IsDeputyHeader` — "müdür" geçince), her satırın
+   ilk hücresinden günü (`DayNameMap`, ClassSchedulesView'daki ile aynı basit sözlük, bilerek KOPYALANDI —
+   ikisi de küçük/bağımsız, ortak yere taşımaya değmedi) çıkarıyor. Kısaltılmış isimler
+   `ResolvePersonnelAbbreviation` ile (ClassSchedulesView.ResolveTeacher ile AYNI sezgisel yöntem: baş harf +
+   soyad eşleşmesi, birden fazla/hiç aday eşleşirse yazıldığı gibi bırakılıyor) Personel listesiyle
+   eşleştiriliyor.
+3. **Yön değiştirme anahtarı:** Kullanıcı, uygulamanın KENDİ ızgarasının da (elle tek tek seçim yaparken)
+   idare belgesiyle aynı yönde (satır=gün/sütun=nöbet yeri) görüntülenebilmesini istedi — çapraz okuma hata
+   riski yaratıyordu. Başlığa "🔄 Yön Değiştir" butonu eklendi (`_daysAsRows` bool + `BuildMatrixDaysAsRows`/
+   `BuildMatrixFloorsAsRows` — veri AYNI, sadece `MatrixGrid`'in hangi ekseni satır/sütun yaptığı değişiyor,
+   hücre üretme mantığı `BuildFloorCell`/`PersonnelCombo` ikisinde de ortak).
+
+**Müdür Yrd. eşleştirmesi Kategori DEĞİL Görev metnine göre — iki tur düzeltme gerekti:**
+- İlk denemede eşleştirmeyi `Category == "staff"` olanlarla sınırlamıştım (idareci = staff varsayımıyla).
+  Kullanıcı haklı olarak itiraz etti: bazı okullarda bir ÖĞRETMEN, Kategorisi "Öğretmen" kalmaya devam
+  ederken fiilen müdür yardımcılığı görevi üstlenebiliyor.
+- **Kesin çözüm:** `IsDeputyTitle(Personnel p) => NormalizeForMatch(p.Title).Contains("mudur")` — Kategoriye
+  bakmadan sadece Görev metnine bakıyor. Kullanıcı öyle biri için sadece Personel sayfasındaki Görev kutusuna
+  "Müdür Yardımcısı" yazıyor, Kategoriyi değiştirmesine gerek yok.
+- Bu kural TÜM eşleştirme noktalarında (elle seçim `PersonnelCombo`, yapıştırma-otomatik-çözümleme) tutarlı
+  uygulanıyor — ayrıca `IsDeputyTitle` olan biri artık kat/"+ Öğretmen" listesinden HARİÇ tutuluyor (aynı gün
+  içinde hem müdür yrd. hem kat nöbetçisi olarak seçilemez). İlk turda sadece yapıştırma tarafını
+  düzeltmiştim, elle seçim ComboBox'ı unutulmuştu — kullanıcı "hâlâ bütün alanlarda bütün liste geliyor"
+  diye bildirince fark edildi, ikinci turda ikisi de tutarlı hale getirildi.
+
+**Ertelenen (kod DEĞİL, sadece not): İkili eğitim (sabah/öğlen) desteği.** Kullanıcının kendi okulunda
+ikili eğitim yok, ama "bu dijital panoyu görüp isteyecek bilişimci arkadaşlar arasında ikili eğitim yapan
+okullar da olacaktır" dedi — yani bu, KENDİ okulu için değil, yazılımı DAĞITACAĞI diğer okullar için ileriye
+dönük bir ihtiyaç. Şimdilik kodlanmadı, sadece tasarım taslağı burada duruyor:
+- Şu an `DutyRosterDay` günde TEK bir Deputy + TEK bir Assignments listesi tutuyor — sabah/öğlen ayrımı yok.
+- Muhtemel yaklaşım: Ayarlar'a "Bu okulda ikili öğretim var" açma/kapama eklenir; açıksa `DutyRosterDay`'e
+  bir `Shift` boyutu eklenir (en basit: `Deputy`/`Assignments`'ı `Dictionary<Shift, ...>` yapmak ya da
+  günde iki ayrı `DutyRosterDay` kaydı — Sabah/Öğlen — tutmak). Nöbet Çizelgesi sayfasına bir Sabah/Öğlen
+  sekmesi/anahtarı gelir. Yapıştırma-import'a da üçüncü bir boyut (hangi shift'e ait olduğu — muhtemelen
+  ayrı bir yapıştırma kutusu, sabah için bir kez öğlen için bir kez) eklenmesi gerekir.
+- Panoda gösterimi de (`DutyTeacherModuleView`) güncel saate göre hangi shift'in aktif olduğunu bilmeli
+  (muhtemelen Ders & Zil Saatleri'ndeki periyotlardan ya da ayrı bir "öğlen başlangıç saati" ayarından).
+- **Bu okulda acil değil, sadece BAŞKA bir okula bu yazılım verilirken gündeme gelecek** — o zaman kullanıcı
+  hangi okulun bu ihtiyacı olduğunu söyleyecek, tasarımı o okulun gerçek düzenine göre netleştirip
+  kodlamak daha sağlıklı olur (şimdiden varsayımla kodlamak yanlış tahmin riski taşır).
