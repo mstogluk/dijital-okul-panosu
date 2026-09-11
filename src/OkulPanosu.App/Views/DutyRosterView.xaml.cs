@@ -194,27 +194,14 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             var available = _personnel.Where(p => p.Category == "teacher" && !IsDeputyTitle(p)).Select(p => p.Name)
                 .Where(n => !day.Assignments.Any(a => a.Floor == floor && a.TeacherName == n))
                 .OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
-
-            // "+ Öğretmen ekle" arama kutusu, her hücrede sürekli açık durursa (5 kat × 5 gün = 25 hücre)
-            // gereksiz görüntü kirliliği yapıyordu — kullanıcı istediğinde küçük bir butonla açılıp,
-            // seçim yapılınca (Rebuild ile) kendiliğinden tekrar kapanan bir düzene geçirildi.
-            var addButton = new Button { Content = "+ Öğretmen Ekle", Style = EditorControls.SecondaryButton, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 2, 0, 0) };
-            var (addPanel, addSearchBox) = SearchableNameCombo(available, null, "+ Öğretmen ekle", name =>
+            var addCombo = NameCombo(available, null, "+ Öğretmen ekle");
+            addCombo.SelectionChanged += (_, _) =>
             {
-                if (name is null) return;
+                if (addCombo.SelectedItem is not string name) return;
                 day.Assignments.Add(new DutyAssignment { Floor = floor, TeacherName = name });
                 Rebuild();
-            });
-            addPanel.Visibility = Visibility.Collapsed;
-            addButton.Click += (_, _) =>
-            {
-                addButton.Visibility = Visibility.Collapsed;
-                addPanel.Visibility = Visibility.Visible;
-                addSearchBox.Focus();
             };
-
-            stack.Children.Add(addButton);
-            stack.Children.Add(addPanel);
+            stack.Children.Add(addCombo);
         }
 
         Rebuild();
@@ -229,80 +216,30 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         var names = _personnel.Where(IsDeputyTitle).Select(p => p.Name).OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
         if (!string.IsNullOrWhiteSpace(currentName) && !names.Contains(currentName)) names.Insert(0, currentName);
 
-        return SearchableNameCombo(names, currentName, "— Seçiniz —", onChanged).Root;
+        var combo = NameCombo(names, currentName, "— Seçiniz —");
+        combo.SelectionChanged += (_, _) =>
+        {
+            var value = combo.SelectedItem as string;
+            onChanged(value == "— Seçiniz —" ? null : value);
+        };
+        return combo;
     }
 
     private static bool IsDeputyTitle(Personnel p) => EditorControls.NormalizeForMatch(p.Title).Contains("mudur");
 
-    /// <summary>Yazarken filtrelenen (aranabilir) isim seçici — hem Müdür Yardımcısı hem "+ Öğretmen"
-    /// listesi için ortak: kullanıcı öğretmen sayısı arttıkça (bu okulda 40+) sıradan bir ComboBox'ta
-    /// isim bulmak zorlaşıyordu. Önce ComboBox'ın kendisini <c>IsEditable</c> yaparak deneduk, ama
-    /// uygulamanın Base.xaml'deki ÖZEL ComboBox şablonunda <c>PART_EditableTextBox</c> hiç tanımlı değil
-    /// (Themes/Base.xaml — sadece bir ToggleButton + SelectionBoxItem gösteren bir ContentPresenter var) —
-    /// bu yüzden IsEditable bu şablonda çalışmıyor, ne yazı girilebiliyor ne seçili metin doğru gösteriliyor.
-    /// Bunun yerine ComboBox DÜZENLENEMEZ bırakılıp (zaten doğru çalıştığı bilinen standart davranış), üstüne
-    /// ayrı, küçük bir arama TextBox'ı eklendi — yazıldıkça ComboBox'ın ItemsSource'unu filtreler.
-    /// <paramref name="initialValue"/> null/boşsa yer tutucu gösterilir; bir öğe seçildiğinde
-    /// <paramref name="onSelected"/> çağrılır (yer tutucu seçilirse null geçilir) ve arama kutusu +
-    /// filtre sıfırlanır.</summary>
-    private static (FrameworkElement Root, TextBox SearchBox) SearchableNameCombo(List<string> sortedNames, string? initialValue, string placeholder, Action<string?> onSelected)
+    /// <summary>Basit, alfabetik sıralı bir isim seçici. Daha önce ayrı bir arama kutusu + katlanır
+    /// buton denendi ama kullanıcıyı ("herşey karıştı") ekstra tıklama/kutu yormuş — geri, tek bir sade
+    /// ComboBox'a dönüldü. WPF'in yerleşik "yazarak atlama" özelliği (IsTextSearchEnabled, varsayılan
+    /// açık) BİLEREK kapatılmıyor: combobox odaktayken bir harfe basmak o harfle başlayan ilk isme atlar,
+    /// hızlı art arda yazmak daraltır — ekstra kod gerektirmez, uygulamanın özel ComboBox şablonuyla da
+    /// (PART_EditableTextBox gerektirmediği için, bkz. IsEditable denemesinin neden başarısız olduğu)
+    /// sorunsuz çalışır.</summary>
+    private static ComboBox NameCombo(List<string> sortedNames, string? initialValue, string placeholder) => new()
     {
-        List<string> FullList() => new List<string> { placeholder }.Concat(sortedNames).ToList();
-
-        var combo = new ComboBox
-        {
-            ItemsSource = FullList(),
-            SelectedItem = string.IsNullOrWhiteSpace(initialValue) ? placeholder : initialValue,
-            Margin = new Thickness(0, 4, 0, 0),
-        };
-
-        var searchBox = new TextBox { Style = EditorControls.TextBoxStyle, ToolTip = "Ara..." };
-
-        // Kutunun bir arama kutusu olduğu belli olsun diye pasif bir mercek ikonu — yazı girilmeye
-        // başlanınca (Text boş olmaktan çıkınca) kayboluyor, kutu temizlenince geri geliyor.
-        var magnifier = new TextBlock
-        {
-            Text = "🔍",
-            FontSize = 11,
-            Foreground = (Brush)Application.Current.Resources["TextMutedBrush"],
-            Margin = new Thickness(8, 0, 0, 0),
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            IsHitTestVisible = false,
-        };
-        var searchOverlay = new Grid();
-        searchOverlay.Children.Add(searchBox);
-        searchOverlay.Children.Add(magnifier);
-
-        var suppress = false;
-
-        searchBox.TextChanged += (_, _) =>
-        {
-            magnifier.Visibility = string.IsNullOrEmpty(searchBox.Text) ? Visibility.Visible : Visibility.Collapsed;
-            if (suppress) return;
-            var norm = EditorControls.NormalizeForMatch(searchBox.Text);
-            combo.ItemsSource = string.IsNullOrEmpty(norm)
-                ? FullList()
-                : sortedNames.Where(n => EditorControls.NormalizeForMatch(n).Contains(norm)).ToList();
-            combo.IsDropDownOpen = true;
-        };
-
-        combo.SelectionChanged += (_, _) =>
-        {
-            if (combo.SelectedItem is not string selected) return;
-            suppress = true;
-            onSelected(selected == placeholder ? null : selected);
-            searchBox.Text = "";
-            combo.ItemsSource = FullList();
-            combo.SelectedItem = selected;
-            suppress = false;
-        };
-
-        var panel = new StackPanel();
-        panel.Children.Add(searchOverlay);
-        panel.Children.Add(combo);
-        return (panel, searchBox);
-    }
+        ItemsSource = new List<string> { placeholder }.Concat(sortedNames).ToList(),
+        SelectedItem = string.IsNullOrWhiteSpace(initialValue) ? placeholder : initialValue,
+        Margin = new Thickness(0, 4, 0, 0),
+    };
 
     private static Border HeaderCell(string text) => new()
     {
