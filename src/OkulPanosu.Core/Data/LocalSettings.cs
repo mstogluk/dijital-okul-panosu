@@ -29,4 +29,9 @@ public sealed class LocalSettings
     public double? ManagementWindowHeight { get; set; }
 
     public bool ManagementWindowMaximized { get; set; }
+
+    /// <summary>Nöbet Çizelgesi'nin görünüm yönü — true: satır=gün/sütun=nöbet yeri (idare belgelerinin
+    /// çoğunun kullandığı düzen), false: satır=nöbet yeri/sütun=gün (uygulamanın eski varsayılanı).
+    /// Makineye özel: her PC kendi tercih ettiği yönü hatırlar.</summary>
+    public bool DutyRosterDaysAsRows { get; set; }
 }

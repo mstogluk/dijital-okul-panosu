@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using OkulPanosu.App.Services;
 using OkulPanosu.Core.Data;
@@ -49,11 +48,13 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
     /// yaparken kaynak belgeyle aynı yönde olması çapraz okumayı/hata riskini azaltıyor. Sadece GÖRÜNÜMÜ
     /// değiştirir, veri (DutyRosterDay/Assignments) her iki yönde de aynı, ToggleOrientation_Click ile
     /// değiştirilip BuildMatrix() yeniden çağrılır.</summary>
-    private bool _daysAsRows;
+    private bool _daysAsRows = AppServices.LocalSettings.DutyRosterDaysAsRows;
 
     private void ToggleOrientation_Click(object sender, RoutedEventArgs e)
     {
         _daysAsRows = !_daysAsRows;
+        AppServices.LocalSettings.DutyRosterDaysAsRows = _daysAsRows;
+        AppServices.SaveLocalSettings();
         BuildMatrix();
     }
 
@@ -178,7 +179,7 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         return stack;
     }
 
-    private ComboBox PersonnelCombo(string currentName, Action<string?> onChanged)
+    private FrameworkElement PersonnelCombo(string currentName, Action<string?> onChanged)
     {
         // Müdür Yardımcısı sütunu: Kategori DEĞİL Görev metni "müdür" içerenlerle sınırlı (bkz. IsDeputyTitle) -
         // bir öğretmen Kategorisi "Öğretmen" kalırken fiilen müdür yrd. görevi üstlenebiliyor (Görev alanına
@@ -193,47 +194,55 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
 
     /// <summary>Yazarken filtrelenen (aranabilir) isim seçici — hem Müdür Yardımcısı hem "+ Öğretmen"
     /// listesi için ortak: kullanıcı öğretmen sayısı arttıkça (bu okulda 40+) sıradan bir ComboBox'ta
-    /// isim bulmak zorlaşıyordu. <paramref name="initialValue"/> null/boşsa yer tutucu gösterilir; bir
-    /// öğe seçildiğinde <paramref name="onSelected"/> çağrılır (yer tutucu seçilirse null geçilir) ve
-    /// filtre sıfırlanıp liste tam hâline döner.</summary>
-    private static ComboBox SearchableNameCombo(List<string> sortedNames, string? initialValue, string placeholder, Action<string?> onSelected)
+    /// isim bulmak zorlaşıyordu. Önce ComboBox'ın kendisini <c>IsEditable</c> yaparak deneduk, ama
+    /// uygulamanın Base.xaml'deki ÖZEL ComboBox şablonunda <c>PART_EditableTextBox</c> hiç tanımlı değil
+    /// (Themes/Base.xaml — sadece bir ToggleButton + SelectionBoxItem gösteren bir ContentPresenter var) —
+    /// bu yüzden IsEditable bu şablonda çalışmıyor, ne yazı girilebiliyor ne seçili metin doğru gösteriliyor.
+    /// Bunun yerine ComboBox DÜZENLENEMEZ bırakılıp (zaten doğru çalıştığı bilinen standart davranış), üstüne
+    /// ayrı, küçük bir arama TextBox'ı eklendi — yazıldıkça ComboBox'ın ItemsSource'unu filtreler.
+    /// <paramref name="initialValue"/> null/boşsa yer tutucu gösterilir; bir öğe seçildiğinde
+    /// <paramref name="onSelected"/> çağrılır (yer tutucu seçilirse null geçilir) ve arama kutusu +
+    /// filtre sıfırlanır.</summary>
+    private static FrameworkElement SearchableNameCombo(List<string> sortedNames, string? initialValue, string placeholder, Action<string?> onSelected)
     {
         List<string> FullList() => new List<string> { placeholder }.Concat(sortedNames).ToList();
 
         var combo = new ComboBox
         {
-            IsEditable = true,
-            IsTextSearchEnabled = false,
-            StaysOpenOnEdit = true,
             ItemsSource = FullList(),
             SelectedItem = string.IsNullOrWhiteSpace(initialValue) ? placeholder : initialValue,
+            Margin = new Thickness(0, 4, 0, 0),
         };
+
+        var searchBox = new TextBox { Style = EditorControls.TextBoxStyle, ToolTip = "Ara..." };
 
         var suppress = false;
 
-        combo.AddHandler(TextBoxBase.TextChangedEvent, new TextChangedEventHandler((_, _) =>
+        searchBox.TextChanged += (_, _) =>
         {
             if (suppress) return;
-            var norm = EditorControls.NormalizeForMatch(combo.Text);
+            var norm = EditorControls.NormalizeForMatch(searchBox.Text);
             combo.ItemsSource = string.IsNullOrEmpty(norm)
                 ? FullList()
                 : sortedNames.Where(n => EditorControls.NormalizeForMatch(n).Contains(norm)).ToList();
             combo.IsDropDownOpen = true;
-        }));
+        };
 
         combo.SelectionChanged += (_, _) =>
         {
-            if (combo.SelectedItem is not string selected || suppress) return;
+            if (combo.SelectedItem is not string selected) return;
             suppress = true;
             onSelected(selected == placeholder ? null : selected);
+            searchBox.Text = "";
             combo.ItemsSource = FullList();
             combo.SelectedItem = selected;
-            combo.Text = selected; // ItemsSource sıfırlanınca WPF görünen metni bazen boşaltıyor - açıkça geri yaz.
-            combo.IsDropDownOpen = false;
             suppress = false;
         };
 
-        return combo;
+        var panel = new StackPanel();
+        panel.Children.Add(searchBox);
+        panel.Children.Add(combo);
+        return panel;
     }
 
     private static Border HeaderCell(string text) => new()
