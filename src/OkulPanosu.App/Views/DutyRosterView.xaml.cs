@@ -194,13 +194,27 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             var available = _personnel.Where(p => p.Category == "teacher" && !IsDeputyTitle(p)).Select(p => p.Name)
                 .Where(n => !day.Assignments.Any(a => a.Floor == floor && a.TeacherName == n))
                 .OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
-            var addCombo = SearchableNameCombo(available, null, "+ Öğretmen ekle", name =>
+
+            // "+ Öğretmen ekle" arama kutusu, her hücrede sürekli açık durursa (5 kat × 5 gün = 25 hücre)
+            // gereksiz görüntü kirliliği yapıyordu — kullanıcı istediğinde küçük bir butonla açılıp,
+            // seçim yapılınca (Rebuild ile) kendiliğinden tekrar kapanan bir düzene geçirildi.
+            var addButton = new Button { Content = "+ Öğretmen Ekle", Style = EditorControls.SecondaryButton, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 2, 0, 0) };
+            var (addPanel, addSearchBox) = SearchableNameCombo(available, null, "+ Öğretmen ekle", name =>
             {
                 if (name is null) return;
                 day.Assignments.Add(new DutyAssignment { Floor = floor, TeacherName = name });
                 Rebuild();
             });
-            stack.Children.Add(addCombo);
+            addPanel.Visibility = Visibility.Collapsed;
+            addButton.Click += (_, _) =>
+            {
+                addButton.Visibility = Visibility.Collapsed;
+                addPanel.Visibility = Visibility.Visible;
+                addSearchBox.Focus();
+            };
+
+            stack.Children.Add(addButton);
+            stack.Children.Add(addPanel);
         }
 
         Rebuild();
@@ -215,7 +229,7 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         var names = _personnel.Where(IsDeputyTitle).Select(p => p.Name).OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
         if (!string.IsNullOrWhiteSpace(currentName) && !names.Contains(currentName)) names.Insert(0, currentName);
 
-        return SearchableNameCombo(names, currentName, "— Seçiniz —", onChanged);
+        return SearchableNameCombo(names, currentName, "— Seçiniz —", onChanged).Root;
     }
 
     private static bool IsDeputyTitle(Personnel p) => EditorControls.NormalizeForMatch(p.Title).Contains("mudur");
@@ -231,7 +245,7 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
     /// <paramref name="initialValue"/> null/boşsa yer tutucu gösterilir; bir öğe seçildiğinde
     /// <paramref name="onSelected"/> çağrılır (yer tutucu seçilirse null geçilir) ve arama kutusu +
     /// filtre sıfırlanır.</summary>
-    private static FrameworkElement SearchableNameCombo(List<string> sortedNames, string? initialValue, string placeholder, Action<string?> onSelected)
+    private static (FrameworkElement Root, TextBox SearchBox) SearchableNameCombo(List<string> sortedNames, string? initialValue, string placeholder, Action<string?> onSelected)
     {
         List<string> FullList() => new List<string> { placeholder }.Concat(sortedNames).ToList();
 
@@ -244,10 +258,27 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
 
         var searchBox = new TextBox { Style = EditorControls.TextBoxStyle, ToolTip = "Ara..." };
 
+        // Kutunun bir arama kutusu olduğu belli olsun diye pasif bir mercek ikonu — yazı girilmeye
+        // başlanınca (Text boş olmaktan çıkınca) kayboluyor, kutu temizlenince geri geliyor.
+        var magnifier = new TextBlock
+        {
+            Text = "🔍",
+            FontSize = 11,
+            Foreground = (Brush)Application.Current.Resources["TextMutedBrush"],
+            Margin = new Thickness(8, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            IsHitTestVisible = false,
+        };
+        var searchOverlay = new Grid();
+        searchOverlay.Children.Add(searchBox);
+        searchOverlay.Children.Add(magnifier);
+
         var suppress = false;
 
         searchBox.TextChanged += (_, _) =>
         {
+            magnifier.Visibility = string.IsNullOrEmpty(searchBox.Text) ? Visibility.Visible : Visibility.Collapsed;
             if (suppress) return;
             var norm = EditorControls.NormalizeForMatch(searchBox.Text);
             combo.ItemsSource = string.IsNullOrEmpty(norm)
@@ -268,9 +299,9 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         };
 
         var panel = new StackPanel();
-        panel.Children.Add(searchBox);
+        panel.Children.Add(searchOverlay);
         panel.Children.Add(combo);
-        return panel;
+        return (panel, searchBox);
     }
 
     private static Border HeaderCell(string text) => new()
