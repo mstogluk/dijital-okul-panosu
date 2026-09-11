@@ -195,6 +195,9 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
                 .Where(n => !day.Assignments.Any(a => a.Floor == floor && a.TeacherName == n))
                 .OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
             var addCombo = NameCombo(available, null, "+ Öğretmen ekle");
+            // Her zaman "+ Öğretmen ekle" yer tutucusunu gösterir (seçim yapılır yapılmaz Rebuild ile
+            // sıfırlanır) - bilerek soluk, atanmış isim çiplerinden göze daha az çarpsın diye.
+            addCombo.Foreground = (Brush)Application.Current.Resources["TextMutedBrush"];
             addCombo.SelectionChanged += (_, _) =>
             {
                 if (addCombo.SelectedItem is not string name) return;
@@ -217,10 +220,18 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         if (!string.IsNullOrWhiteSpace(currentName) && !names.Contains(currentName)) names.Insert(0, currentName);
 
         var combo = NameCombo(names, currentName, "— Seçiniz —");
+
+        // Henüz kimse seçilmemişse ("— Seçiniz —" gösteriliyorsa) soluk, gerçek bir isim seçilince
+        // parlak/belirgin — kullanıcı tabloya baktığında hangi yerlerde isim atanmış olduğu göze çarpsın.
+        void UpdateForeground() => combo.Foreground = (Brush)Application.Current.Resources[
+            combo.SelectedItem as string == "— Seçiniz —" ? "TextMutedBrush" : "TextPrimaryBrush"];
+        UpdateForeground();
+
         combo.SelectionChanged += (_, _) =>
         {
             var value = combo.SelectedItem as string;
             onChanged(value == "— Seçiniz —" ? null : value);
+            UpdateForeground();
         };
         return combo;
     }
