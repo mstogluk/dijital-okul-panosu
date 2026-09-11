@@ -31,12 +31,14 @@
             <StackPanel>
                 <TextBlock Text="Excel'den/İdareden Gelen Çizelgeyi Yapıştır" Style="{StaticResource HeadingStyle}" Margin="0,0,0,4" />
                 <TextBlock TextWrapping="Wrap" Style="{StaticResource MutedTextStyle}" Margin="0,0,0,8">
-                    İdareden gelen çizelgeyi (satırlar gün, sütunlar nöbet yeri — ilk sütun boş bırakılabilir,
-                    sütun başlıkları "Bahçe", "Zemin Kat", "1. Kat" .. gibi ya da "Nöbetçi Müdür Yrd." olabilir,
-                    sıraları önemli değil) Excel'e yapıştırıp oradan kopyalayarak veya doğrudan buraya
-                    yapıştırın. Hücrede birden fazla isim varsa (Alt+Enter ile) her biri ayrı satırda olmalı.
-                    Kısaltılmış isimler ("E.BAKIR" gibi) Personel listesindeki tam adla eşleştirilmeye
-                    çalışılır — eşleşmezse yazdığınız gibi kaydedilir.
+                    İdareden gelen çizelgeyi Excel'e aktarıp oradan kopyalayarak (veya doğrudan) buraya
+                    yapıştırın — HANGİ YÖNDE olduğu (satırlar gün/sütunlar nöbet yeri, ya da tam tersi)
+                    otomatik anlaşılır, siz karar vermenize gerek yok. Sütun/satır başlıkları "Bahçe",
+                    "Zemin Kat", "1. Kat" .. gibi ya da "Nöbetçi Müdür Yrd." olmalı; aynı yerde birden fazla
+                    kişi varsa o satır/sütun tekrarlanabilir ya da hücrede (Alt+Enter ile) ayrı satırda
+                    yazılabilir. Boş hücreler "-" ile bırakılabilir. Kısaltılmış isimler ("E.BAKIR" gibi)
+                    Personel listesindeki tam adla eşleştirilmeye çalışılır — eşleşmezse yazdığınız gibi
+                    kaydedilir.
                 </TextBlock>
                 <TextBox x:Name="PasteBox" Style="{StaticResource WatermarkTextBoxStyle}" AcceptsReturn="True"
                          AcceptsTab="True" TextWrapping="NoWrap" Height="110"

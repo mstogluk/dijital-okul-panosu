@@ -278,14 +278,15 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         ["cuma"] = DayOfWeek.Friday, ["cum"] = DayOfWeek.Friday,
     };
 
-    /// <summary>İdareden gelen çizelgenin, panomuzunkinin AKSİNE (satır=kat, sütun=gün) genelde satır=gün,
-    /// sütun=nöbet yeri biçiminde geldiğini gördük (bkz. gerçek okul PDF'i) — bu yüzden yapıştırma ayrı bir
-    /// yönde ayrıştırılıyor: ilk satır başlık (nöbet yeri adları + "Nöbetçi Müdür Yrd."), sonraki her satırın
-    /// ilk hücresi gün adı. Bir hücrede birden fazla isim (Alt+Enter ile) ayrı satırlarda olabilir. Kısaltılmış
-    /// isimler ("E.BAKIR" gibi) Personel listesiyle (baş harf + soyad eşleşmesi, ClassSchedulesView'daki
-    /// ResolveTeacher ile aynı sezgisel yöntem) eşleştirilmeye çalışılır; birden fazla ya da hiç aday
-    /// eşleşmezse yazdığınız gibi bırakılır (yanlış eşleştirmektense) — arama kutulu seçicilerden elle
-    /// düzeltilebilir.</summary>
+    /// <summary>İdareden gelen çizelgeler İKİ farklı yönde karşımıza çıktı: kimi satır=gün/sütun=nöbet yeri
+    /// (gerçek okul PDF'i), kimi satır=nöbet yeri/sütun=gün (kullanıcının Excel'e kendi döktüğü, bizim
+    /// varsayılan görünümümüzle aynı yön — aynı yerde birden fazla kişi varsa o yer birden fazla satırda
+    /// TEKRARLANABİLİR, ör. iki ayrı "BAHÇE" satırı). Hangi yönde olduğu başlık satırından otomatik
+    /// anlaşılır (bkz. ApplyPaste_Click) — kullanıcının hangi yönde yapıştırdığını bilmesine gerek yok.
+    /// "-" gibi boş yer tutucular (bkz. IsEmptyPlaceholder) atlanır. Kısaltılmış isimler ("E.BAKIR" gibi)
+    /// Personel listesiyle (baş harf + soyad eşleşmesi, ClassSchedulesView'daki ResolveTeacher ile aynı
+    /// sezgisel yöntem) eşleştirilmeye çalışılır; birden fazla ya da hiç aday eşleşmezse yazdığınız gibi
+    /// bırakılır (yanlış eşleştirmektense) — arama kutulu seçicilerden elle düzeltilebilir.</summary>
     private void ApplyPaste_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(PasteBox.Text)) return;
@@ -293,10 +294,46 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         var rows = EditorControls.ParseTable(PasteBox.Text);
         if (rows.Count < 2)
         {
-            ShowStatus("Yapıştırılan veri tanınamadı — en az bir başlık satırı ve bir gün satırı olmalı.");
+            ShowPasteError("Yapıştırılan veri tanınamadı — en az bir başlık satırı ve bir veri satırı olmalı.");
             return;
         }
 
+        // Yön tespiti: başlık satırındaki hücrelerin çoğu gün adı mı (satır=nöbet yeri biçimi), yoksa
+        // nöbet yeri/Müdür Yrd. adı mı (satır=gün biçimi) - hangisi daha çok eşleşiyorsa o kabul edilir.
+        var header = rows[0];
+        var dayColumnHits = 0;
+        var floorColumnHits = 0;
+        for (var c = 1; c < header.Count; c++)
+        {
+            if (string.IsNullOrWhiteSpace(header[c])) continue;
+            if (MatchDayName(header[c]) is not null) dayColumnHits++;
+            else if (IsDeputyHeader(header[c]) || MatchFloorHeader(header[c]) is not null) floorColumnHits++;
+        }
+
+        var result = dayColumnHits > 0 && dayColumnHits >= floorColumnHits
+            ? ApplyPasteDayColumns(rows)
+            : floorColumnHits > 0 ? ApplyPasteFloorColumns(rows) : null;
+
+        if (result is not { } r)
+        {
+            ShowPasteError("Başlık satırı tanınamadı — başlık satırında ya gün adları (Pazartesi, Salı ...) ya da " +
+                           "nöbet yeri adları (\"Bahçe\", \"Zemin Kat\", \"1. Kat\" gibi) ya da \"Nöbetçi Müdür Yrd.\" olmalı.");
+            return;
+        }
+
+        BuildMatrix();
+        PasteBox.Text = "";
+
+        var message = $"{r.RowCount} satır işlendi.";
+        if (r.Resolved > 0) message += $" {r.Resolved} isim Personel listesiyle eşleştirildi.";
+        if (r.Unresolved > 0) message += $" {r.Unresolved} isim eşleştirilemedi, yazdığınız gibi kaydedildi — arama kutusundan elle düzeltebilirsiniz.";
+        message += " Kontrol edip \"Kaydet\"e basmayı unutmayın.";
+        ShowStatus(message);
+    }
+
+    /// <summary>Satır=gün, sütun=nöbet yeri/Müdür Yrd. (gerçek okul PDF'inin doğal yönü).</summary>
+    private (int RowCount, int Resolved, int Unresolved)? ApplyPasteFloorColumns(List<List<string>> rows)
+    {
         var header = rows[0];
         var floorColumns = new Dictionary<int, string>();
         int? deputyColumn = null;
@@ -307,17 +344,12 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             if (IsDeputyHeader(text)) { deputyColumn = c; continue; }
             if (MatchFloorHeader(text) is { } floor) floorColumns[c] = floor;
         }
-
-        if (floorColumns.Count == 0 && deputyColumn is null)
-        {
-            ShowStatus("Sütun başlıkları tanınamadı — başlık satırında \"Bahçe\", \"Zemin Kat\", \"1. Kat\" gibi " +
-                       "nöbet yeri adları ya da \"Nöbetçi Müdür Yrd.\" olmalı.");
-            return;
-        }
+        if (floorColumns.Count == 0 && deputyColumn is null) return null;
 
         var resolvedCount = 0;
         var unresolvedCount = 0;
         var dayCount = 0;
+        var clearedFloors = new HashSet<(DayOfWeek, string)>();
 
         for (var r = 1; r < rows.Count; r++)
         {
@@ -329,10 +361,9 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             if (deputyColumn is { } dc && dc < cells.Count)
             {
                 var raw = cells[dc].Split('\n')[0].Trim();
-                if (raw.Length > 0)
+                if (raw.Length > 0 && !IsEmptyPlaceholder(raw))
                 {
-                    var deputyCandidates = _personnel.Where(IsDeputyTitle).ToList();
-                    var (name, resolved) = ResolvePersonName(raw, deputyCandidates);
+                    var (name, resolved) = ResolvePersonName(raw, _personnel.Where(IsDeputyTitle).ToList());
                     day.Deputy = name;
                     if (resolved) resolvedCount++; else unresolvedCount++;
                 }
@@ -341,14 +372,12 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             foreach (var (col, floor) in floorColumns)
             {
                 if (col >= cells.Count) continue;
-                var names = cells[col].Replace("\r\n", "\n").Split('\n')
-                    .SelectMany(l => l.Split([',', ';']))
-                    .Select(n => n.Trim())
-                    .Where(n => n.Length > 0)
-                    .ToList();
+                var names = SplitNames(cells[col]);
                 if (names.Count == 0) continue;
 
-                day.Assignments.RemoveAll(a => a.Floor == floor);
+                if (clearedFloors.Add((dow, floor)))
+                    day.Assignments.RemoveAll(a => a.Floor == floor);
+
                 foreach (var raw in names)
                 {
                     var (name, resolved) = ResolvePersonName(raw);
@@ -358,21 +387,88 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             }
         }
 
-        BuildMatrix();
-        PasteBox.Text = "";
-
-        var message = $"{dayCount} gün işlendi.";
-        if (resolvedCount > 0) message += $" {resolvedCount} isim Personel listesiyle eşleştirildi.";
-        if (unresolvedCount > 0) message += $" {unresolvedCount} isim eşleştirilemedi, yazdığınız gibi kaydedildi — arama kutusundan elle düzeltebilirsiniz.";
-        message += " Kontrol edip \"Kaydet\"e basmayı unutmayın.";
-        ShowStatus(message);
+        return (dayCount, resolvedCount, unresolvedCount);
     }
+
+    /// <summary>Satır=nöbet yeri/Müdür Yrd. (aynı yer, birden fazla kişi varsa birden fazla satırda
+    /// tekrarlanabilir), sütun=gün — kullanıcının Excel'e kendi elleriyle döktüğü, bizim varsayılan
+    /// görünümümüzle aynı yön.</summary>
+    private (int RowCount, int Resolved, int Unresolved)? ApplyPasteDayColumns(List<List<string>> rows)
+    {
+        var header = rows[0];
+        var dayColumns = new Dictionary<int, DayOfWeek>();
+        for (var c = 1; c < header.Count; c++)
+            if (MatchDayName(header[c]) is { } dow) dayColumns[c] = dow;
+        if (dayColumns.Count == 0) return null;
+
+        var resolvedCount = 0;
+        var unresolvedCount = 0;
+        var rowCount = 0;
+        var clearedFloors = new HashSet<(DayOfWeek, string)>();
+
+        for (var r = 1; r < rows.Count; r++)
+        {
+            var cells = rows[r];
+            if (cells.Count == 0 || string.IsNullOrWhiteSpace(cells[0])) continue;
+            var label = cells[0].Trim();
+            var isDeputyRow = IsDeputyHeader(label);
+            var floor = isDeputyRow ? null : MatchFloorHeader(label);
+            if (!isDeputyRow && floor is null) continue; // tanınmayan satır etiketi (ör. yanlışlıkla eklenmiş bir başlık) - atla
+            rowCount++;
+
+            foreach (var (col, dow) in dayColumns)
+            {
+                if (col >= cells.Count) continue;
+                var day = DayRow(dow);
+
+                if (isDeputyRow)
+                {
+                    var raw = cells[col].Split('\n')[0].Trim();
+                    if (raw.Length == 0 || IsEmptyPlaceholder(raw)) continue;
+                    var (name, resolved) = ResolvePersonName(raw, _personnel.Where(IsDeputyTitle).ToList());
+                    day.Deputy = name;
+                    if (resolved) resolvedCount++; else unresolvedCount++;
+                }
+                else
+                {
+                    var names = SplitNames(cells[col]);
+                    if (names.Count == 0) continue;
+
+                    if (clearedFloors.Add((dow, floor!)))
+                        day.Assignments.RemoveAll(a => a.Floor == floor);
+
+                    foreach (var raw in names)
+                    {
+                        var (name, resolved) = ResolvePersonName(raw);
+                        day.Assignments.Add(new DutyAssignment { Floor = floor!, TeacherName = name });
+                        if (resolved) resolvedCount++; else unresolvedCount++;
+                    }
+                }
+            }
+        }
+
+        return (rowCount, resolvedCount, unresolvedCount);
+    }
+
+    private static List<string> SplitNames(string raw) =>
+        raw.Replace("\r\n", "\n").Split('\n')
+            .SelectMany(l => l.Split([',', ';']))
+            .Select(n => n.Trim())
+            .Where(n => n.Length > 0 && !IsEmptyPlaceholder(n))
+            .ToList();
+
+    private static bool IsEmptyPlaceholder(string s) => s is "-" or "—" or "--";
 
     private void ShowStatus(string text)
     {
         StatusText.Text = text;
         StatusText.Visibility = Visibility.Visible;
     }
+
+    /// <summary>Yapıştırma sorunları artık sayfanın üstündeki soluk bir metin yerine bir uyarı PENCERESİ
+    /// olarak gösteriliyor — kullanıcı gerçek veriyle test ederken küçük/sessiz durum yazısını fark etmeyip
+    /// hatayı uzun süre başka yerde aradığını bildirdi.</summary>
+    private void ShowPasteError(string message) => AppMessageBox.Show(Window.GetWindow(this), message, "Yapıştırma Sorunu");
 
     private static bool IsDeputyHeader(string header) => EditorControls.NormalizeForMatch(header).Contains("mudur");
 
