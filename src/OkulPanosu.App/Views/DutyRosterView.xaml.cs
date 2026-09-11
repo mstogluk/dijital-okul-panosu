@@ -267,10 +267,12 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
                 var raw = cells[dc].Split('\n')[0].Trim();
                 if (raw.Length > 0)
                 {
-                    // Müdür Yardımcısı sütunu daima idari kadrodan (Category=staff) biridir - eşleştirmeyi
-                    // buna daraltmak, aynı soyadlı bir öğretmenle (ör. iki "Eren") karışmasını önler.
-                    var adminOnly = _personnel.Where(p => p.Category == "staff").ToList();
-                    var (name, resolved) = ResolvePersonName(raw, adminOnly);
+                    // Müdür Yardımcısı sütununu, Kategori DEĞİL Görev metni "müdür" içerenlerle daraltıyoruz -
+                    // bazen bir öğretmen Kategorisi "Öğretmen" kalmaya devam ederken fiilen müdür yrd. görevi
+                    // üstlenebiliyor (Görev alanına "Müdür Yardımcısı" yazılması yeterli, Kategori değişmesine
+                    // gerek yok). Bu daraltma, aynı soyadlı birinin (ör. iki "Eren") karışmasını önlüyor.
+                    var deputyCandidates = _personnel.Where(p => EditorControls.NormalizeForMatch(p.Title).Contains("mudur")).ToList();
+                    var (name, resolved) = ResolvePersonName(raw, deputyCandidates);
                     day.Deputy = name;
                     if (resolved) resolvedCount++; else unresolvedCount++;
                 }
