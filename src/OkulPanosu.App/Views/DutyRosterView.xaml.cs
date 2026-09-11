@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using OkulPanosu.App.Services;
 using OkulPanosu.Core.Data;
@@ -111,19 +112,15 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
                 stack.Children.Add(chip);
             }
 
-            var addCombo = new ComboBox
+            var available = _personnel.Where(p => p.Category == "teacher").Select(p => p.Name)
+                .Where(n => !day.Assignments.Any(a => a.Floor == floor && a.TeacherName == n))
+                .OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
+            var addCombo = SearchableNameCombo(available, null, "+ Öğretmen ekle", name =>
             {
-                ItemsSource = _personnel.Where(p => p.Category == "teacher").Select(p => p.Name)
-                    .Where(n => !day.Assignments.Any(a => a.Floor == floor && a.TeacherName == n)).ToList(),
-                SelectedIndex = -1,
-                ToolTip = "+ Öğretmen ekle",
-            };
-            addCombo.SelectionChanged += (_, _) =>
-            {
-                if (addCombo.SelectedItem is not string name) return;
+                if (name is null) return;
                 day.Assignments.Add(new DutyAssignment { Floor = floor, TeacherName = name });
                 Rebuild();
-            };
+            });
             stack.Children.Add(addCombo);
         }
 
@@ -133,16 +130,52 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
 
     private ComboBox PersonnelCombo(string currentName, Action<string?> onChanged)
     {
-        var names = _personnel.Select(p => p.Name).ToList();
+        var names = _personnel.Select(p => p.Name).OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
         if (!string.IsNullOrWhiteSpace(currentName) && !names.Contains(currentName)) names.Insert(0, currentName);
-        names.Insert(0, "— Seçiniz —");
 
-        var combo = new ComboBox { ItemsSource = names, SelectedItem = string.IsNullOrWhiteSpace(currentName) ? "— Seçiniz —" : currentName };
+        return SearchableNameCombo(names, currentName, "— Seçiniz —", onChanged);
+    }
+
+    /// <summary>Yazarken filtrelenen (aranabilir) isim seçici — hem Müdür Yardımcısı hem "+ Öğretmen"
+    /// listesi için ortak: kullanıcı öğretmen sayısı arttıkça (bu okulda 40+) sıradan bir ComboBox'ta
+    /// isim bulmak zorlaşıyordu. <paramref name="initialValue"/> null/boşsa yer tutucu gösterilir; bir
+    /// öğe seçildiğinde <paramref name="onSelected"/> çağrılır (yer tutucu seçilirse null geçilir) ve
+    /// filtre sıfırlanıp liste tam hâline döner.</summary>
+    private static ComboBox SearchableNameCombo(List<string> sortedNames, string? initialValue, string placeholder, Action<string?> onSelected)
+    {
+        List<string> FullList() => new List<string> { placeholder }.Concat(sortedNames).ToList();
+
+        var combo = new ComboBox
+        {
+            IsEditable = true,
+            IsTextSearchEnabled = false,
+            StaysOpenOnEdit = true,
+            ItemsSource = FullList(),
+            SelectedItem = string.IsNullOrWhiteSpace(initialValue) ? placeholder : initialValue,
+        };
+
+        var suppress = false;
+
+        combo.AddHandler(TextBoxBase.TextChangedEvent, new TextChangedEventHandler((_, _) =>
+        {
+            if (suppress) return;
+            var norm = EditorControls.NormalizeForMatch(combo.Text);
+            combo.ItemsSource = string.IsNullOrEmpty(norm)
+                ? FullList()
+                : sortedNames.Where(n => EditorControls.NormalizeForMatch(n).Contains(norm)).ToList();
+            combo.IsDropDownOpen = true;
+        }));
+
         combo.SelectionChanged += (_, _) =>
         {
-            var value = combo.SelectedItem as string;
-            onChanged(value == "— Seçiniz —" ? null : value);
+            if (combo.SelectedItem is not string selected || suppress) return;
+            suppress = true;
+            onSelected(selected == placeholder ? null : selected);
+            combo.ItemsSource = FullList();
+            combo.IsDropDownOpen = false;
+            suppress = false;
         };
+
         return combo;
     }
 

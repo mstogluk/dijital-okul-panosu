@@ -241,9 +241,12 @@ public partial class PersonnelView : UserControl, IReloadablePage
     /// satırındaki metinlerden (Ad Soyad ya da ayrı Adı/Soyadı, Branş, Cinsiyet, Görev/Ünvan, opsiyonel
     /// doğum tarihi) hangi sütunun ne olduğu otomatik bulunur (bkz. DetectColumns), Sınıf Ders Programı ve
     /// Öğrenciler'deki yapıştırma özellikleriyle aynı yaklaşım. Bir Görev sütunu VARSA her satır kendi
-    /// göreviyle eklenir ve Kategori o göreve göre belirlenir (metninde "öğretmen" geçiyorsa Öğretmen,
-    /// yoksa Diğer Personel — ör. "Memur", "Hizmetli"); Görev sütunu YOKSA eski davranış korunur (tüm
-    /// satırlar "Öğretmen" olur) — geriye dönük uyumluluk için. Zaten listede AYNEN olan bir isim sessizce
+    /// göreviyle eklenir ve Kategori o göreve göre belirlenir — ama e-Okul dışa aktarımlarında "Görev"
+    /// sütunu öğretmenler için genelde literal "Öğretmen" değil, doğrudan BRANŞ adını (ör. "Matematik",
+    /// "İngilizce") içerir, o yüzden varsayılan TEACHER'dır; sadece bilinen idari/destek kadrosu
+    /// anahtar kelimeleri (Müdür, Memur, Hizmetli, Sekreter, Güvenlik, Temizlik, Şoför, Aşçı, Teknisyen,
+    /// Bekçi) geçiyorsa Diğer Personel sayılır (bkz. IsNonTeachingTitle). Görev sütunu YOKSA da aynı
+    /// mantıkla varsayılan "Öğretmen" olur. Zaten listede AYNEN olan bir isim sessizce
     /// atlanır; BENZER görünen (ör. "Mehmet Sait Örnek" listede varken yeni satır "M. Sait Örnek" diyorsa —
     /// muhtemelen aynı kişi farklı yazılmış) bir isim bulunursa kullanıcıya sorulur, otomatik karar
     /// verilmez (bkz. FindSimilarExisting).</summary>
@@ -302,7 +305,7 @@ public partial class PersonnelView : UserControl, IReloadablePage
 
             var title = columns.Title is { } t ? Cell(t) : "Öğretmen";
             if (string.IsNullOrWhiteSpace(title)) title = "Öğretmen";
-            var category = EditorControls.NormalizeForMatch(title).Contains("ogretmen") ? "teacher" : "staff";
+            var category = IsNonTeachingTitle(title) ? "staff" : "teacher";
 
             int? day = null, month = null;
             if (columns.Date is { } d)
@@ -393,6 +396,14 @@ public partial class PersonnelView : UserControl, IReloadablePage
     }
 
     private sealed record ColumnMap(int? Name, int? FirstName, int? LastName, int? Branch, int? Gender, int? Title, int? Day, int? Month, int? Date);
+
+    private static readonly string[] NonTeachingKeywords =
+        ["mudur", "memur", "hizmetli", "sekreter", "guvenlik", "temizlik", "sofor", "asci", "teknisyen", "bekci"];
+
+    /// <summary>Görev/Ünvan metninde bilinen bir idari/destek kadrosu anahtar kelimesi geçiyor mu — geçmiyorsa
+    /// (ör. sadece bir branş adıysa) öğretmen sayılır, bkz. BulkImport_Click üstündeki açıklama.</summary>
+    private static bool IsNonTeachingTitle(string title) =>
+        NonTeachingKeywords.Any(k => EditorControls.NormalizeForMatch(title).Contains(k));
 
     private static ColumnMap? DetectColumns(List<string> header)
     {
