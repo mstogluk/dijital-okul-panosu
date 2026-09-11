@@ -15,7 +15,12 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Text="🗓️ Haftalık Kat Nöbetçi Çizelgesi" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
-            <Button x:Name="SaveButton" Grid.Column="1" Content="Kaydet" Style="{StaticResource PrimaryButtonStyle}" Click="Save_Click" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="🔄 Yön Değiştir (Gün/Nöbet Yeri)" Style="{StaticResource SecondaryButtonStyle}"
+                        Margin="0,0,8,0" Click="ToggleOrientation_Click"
+                        ToolTip="Tabloyu satır=gün/sütun=nöbet yeri ile satır=nöbet yeri/sütun=gün arasında çevirir" />
+                <Button x:Name="SaveButton" Content="Kaydet" Style="{StaticResource PrimaryButtonStyle}" Click="Save_Click" />
+            </StackPanel>
         </Grid>
 
         <TextBlock Grid.Row="1" x:Name="StatusText" Foreground="{StaticResource SuccessBrush}" Margin="0,10,0,0"

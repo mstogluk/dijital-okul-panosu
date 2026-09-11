@@ -44,12 +44,30 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
 
     private DutyRosterDay DayRow(DayOfWeek day) => _roster.First(r => r.Day == day);
 
+    /// <summary>false: mevcut/varsayılan görünüm (satır=nöbet yeri, sütun=gün). true: idareden gelen
+    /// çizelgelerin çoğunun kullandığı görünüm (satır=gün, sütun=nöbet yeri) — kullanıcı elle giriş
+    /// yaparken kaynak belgeyle aynı yönde olması çapraz okumayı/hata riskini azaltıyor. Sadece GÖRÜNÜMÜ
+    /// değiştirir, veri (DutyRosterDay/Assignments) her iki yönde de aynı, ToggleOrientation_Click ile
+    /// değiştirilip BuildMatrix() yeniden çağrılır.</summary>
+    private bool _daysAsRows;
+
+    private void ToggleOrientation_Click(object sender, RoutedEventArgs e)
+    {
+        _daysAsRows = !_daysAsRows;
+        BuildMatrix();
+    }
+
     private void BuildMatrix()
     {
         MatrixGrid.RowDefinitions.Clear();
         MatrixGrid.ColumnDefinitions.Clear();
         MatrixGrid.Children.Clear();
 
+        if (_daysAsRows) BuildMatrixDaysAsRows(); else BuildMatrixFloorsAsRows();
+    }
+
+    private void BuildMatrixFloorsAsRows()
+    {
         MatrixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
         foreach (var _ in WorkDays)
             MatrixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(220) });
@@ -85,6 +103,37 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         }
     }
 
+    private void BuildMatrixDaysAsRows()
+    {
+        MatrixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
+        foreach (var _ in DutyRosterDay.DefaultFloors)
+            MatrixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) });
+        MatrixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) });
+
+        var rowCount = 1 + WorkDays.Length;
+        for (var i = 0; i < rowCount; i++)
+            MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+        // Nöbet yeri başlıkları + Müdür Yrd
+        AddCell(0, 0, HeaderCell(""));
+        for (var f = 0; f < DutyRosterDay.DefaultFloors.Length; f++)
+            AddCell(0, f + 1, HeaderCell(DutyRosterDay.DefaultFloors[f].ToUpper(Turkish)));
+        AddCell(0, DutyRosterDay.DefaultFloors.Length + 1, HeaderCell("👑 NÖBETÇİ MD. YRD."));
+
+        for (var d = 0; d < WorkDays.Length; d++)
+        {
+            var day = DayRow(WorkDays[d]);
+            AddCell(d + 1, 0, HeaderCell(Turkish.DateTimeFormat.GetDayName(WorkDays[d]).ToUpper(Turkish)));
+            for (var f = 0; f < DutyRosterDay.DefaultFloors.Length; f++)
+            {
+                var floor = DutyRosterDay.DefaultFloors[f];
+                AddCell(d + 1, f + 1, Pad(BuildFloorCell(day, floor)));
+            }
+            var combo = PersonnelCombo(day.Deputy, name => day.Deputy = name ?? "");
+            AddCell(d + 1, DutyRosterDay.DefaultFloors.Length + 1, Pad(combo));
+        }
+    }
+
     private UIElement BuildFloorCell(DutyRosterDay day, string floor)
     {
         var stack = new StackPanel();
@@ -113,7 +162,7 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
                 stack.Children.Add(chip);
             }
 
-            var available = _personnel.Where(p => p.Category == "teacher").Select(p => p.Name)
+            var available = _personnel.Where(p => p.Category == "teacher" && !IsDeputyTitle(p)).Select(p => p.Name)
                 .Where(n => !day.Assignments.Any(a => a.Floor == floor && a.TeacherName == n))
                 .OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
             var addCombo = SearchableNameCombo(available, null, "+ Öğretmen ekle", name =>
@@ -131,11 +180,16 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
 
     private ComboBox PersonnelCombo(string currentName, Action<string?> onChanged)
     {
-        var names = _personnel.Select(p => p.Name).OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
+        // Müdür Yardımcısı sütunu: Kategori DEĞİL Görev metni "müdür" içerenlerle sınırlı (bkz. IsDeputyTitle) -
+        // bir öğretmen Kategorisi "Öğretmen" kalırken fiilen müdür yrd. görevi üstlenebiliyor (Görev alanına
+        // "Müdür Yardımcısı" yazılması yeterli). Bu sayede normal branş öğretmenleri bu listede görünmüyor.
+        var names = _personnel.Where(IsDeputyTitle).Select(p => p.Name).OrderBy(n => n, StringComparer.Create(Turkish, false)).ToList();
         if (!string.IsNullOrWhiteSpace(currentName) && !names.Contains(currentName)) names.Insert(0, currentName);
 
         return SearchableNameCombo(names, currentName, "— Seçiniz —", onChanged);
     }
+
+    private static bool IsDeputyTitle(Personnel p) => EditorControls.NormalizeForMatch(p.Title).Contains("mudur");
 
     /// <summary>Yazarken filtrelenen (aranabilir) isim seçici — hem Müdür Yardımcısı hem "+ Öğretmen"
     /// listesi için ortak: kullanıcı öğretmen sayısı arttıkça (bu okulda 40+) sıradan bir ComboBox'ta
@@ -267,11 +321,7 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
                 var raw = cells[dc].Split('\n')[0].Trim();
                 if (raw.Length > 0)
                 {
-                    // Müdür Yardımcısı sütununu, Kategori DEĞİL Görev metni "müdür" içerenlerle daraltıyoruz -
-                    // bazen bir öğretmen Kategorisi "Öğretmen" kalmaya devam ederken fiilen müdür yrd. görevi
-                    // üstlenebiliyor (Görev alanına "Müdür Yardımcısı" yazılması yeterli, Kategori değişmesine
-                    // gerek yok). Bu daraltma, aynı soyadlı birinin (ör. iki "Eren") karışmasını önlüyor.
-                    var deputyCandidates = _personnel.Where(p => EditorControls.NormalizeForMatch(p.Title).Contains("mudur")).ToList();
+                    var deputyCandidates = _personnel.Where(IsDeputyTitle).ToList();
                     var (name, resolved) = ResolvePersonName(raw, deputyCandidates);
                     day.Deputy = name;
                     if (resolved) resolvedCount++; else unresolvedCount++;
