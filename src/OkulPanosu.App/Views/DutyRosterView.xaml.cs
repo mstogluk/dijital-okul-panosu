@@ -239,6 +239,9 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         ItemsSource = new List<string> { placeholder }.Concat(sortedNames).ToList(),
         SelectedItem = string.IsNullOrWhiteSpace(initialValue) ? placeholder : initialValue,
         Margin = new Thickness(0, 4, 0, 0),
+        // Yerleşik "yazarak atlama" özelliğinin kendisi keşfedilmesi zor olduğundan (görünür bir arama
+        // kutusu yok), en azından üzerine gelince görünen bir ipucuyla hatırlatılıyor.
+        ToolTip = "İçine tıklayıp bir harfe basarak o harfle başlayan isme hızlıca atlayabilirsiniz.",
     };
 
     private static Border HeaderCell(string text) => new()
