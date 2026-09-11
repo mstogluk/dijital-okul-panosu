@@ -267,7 +267,10 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
                 var raw = cells[dc].Split('\n')[0].Trim();
                 if (raw.Length > 0)
                 {
-                    var (name, resolved) = ResolvePersonName(raw);
+                    // Müdür Yardımcısı sütunu daima idari kadrodan (Category=staff) biridir - eşleştirmeyi
+                    // buna daraltmak, aynı soyadlı bir öğretmenle (ör. iki "Eren") karışmasını önler.
+                    var adminOnly = _personnel.Where(p => p.Category == "staff").ToList();
+                    var (name, resolved) = ResolvePersonName(raw, adminOnly);
                     day.Deputy = name;
                     if (resolved) resolvedCount++; else unresolvedCount++;
                 }
@@ -328,10 +331,10 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
     private static DayOfWeek? MatchDayName(string text) =>
         DayNameMap.TryGetValue(EditorControls.NormalizeForMatch(text), out var d) ? d : null;
 
-    private (string Name, bool Resolved) ResolvePersonName(string raw)
+    private (string Name, bool Resolved) ResolvePersonName(string raw, List<Personnel>? candidates = null)
     {
         if (string.IsNullOrWhiteSpace(raw)) return (raw, false);
-        return ResolvePersonnelAbbreviation(raw, _personnel) is { } resolved ? (resolved, true) : (raw, false);
+        return ResolvePersonnelAbbreviation(raw, candidates ?? _personnel) is { } resolved ? (resolved, true) : (raw, false);
     }
 
     /// <summary>"E.BAKIR" gibi kısaltılmış bir adı Personel listesindeki TAM adla eşleştirmeye çalışır — baş
