@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using OkulPanosu.App.Services;
 using OkulPanosu.Core.Data;
@@ -58,6 +59,33 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
         BuildMatrix();
     }
 
+    /// <summary>Matrisin sol-üst köşesindeki boş hücre yerine, tıklanınca yönü değiştiren bir hücre —
+    /// kullanıcı ayrı bir buton yerine tam olarak bu köşede olmasını istedi (idare belgelerinde de bu köşe
+    /// genelde "Nöbet Yerleri ->" gibi bir etiket taşır, burada işlevsel bir kontrol olması mantıklı).</summary>
+    private Border OrientationToggleCell()
+    {
+        var border = new Border
+        {
+            Background = new SolidColorBrush(Color.FromRgb(0x6B, 0x1E, 0x1E)),
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(10),
+            Margin = new Thickness(2),
+            Cursor = Cursors.Hand,
+            ToolTip = "Tabloyu satır=gün/sütun=nöbet yeri ile satır=nöbet yeri/sütun=gün arasında çevirir",
+            Child = new TextBlock
+            {
+                Text = "🔄 Yön Değiştir\n(Gün/Yer)",
+                FontSize = 12,
+                FontWeight = FontWeights.Bold,
+                Foreground = Brushes.White,
+                TextWrapping = TextWrapping.Wrap,
+                TextAlignment = TextAlignment.Center,
+            },
+        };
+        border.MouseLeftButtonUp += (_, _) => ToggleOrientation_Click(border, new RoutedEventArgs());
+        return border;
+    }
+
     private void BuildMatrix()
     {
         MatrixGrid.RowDefinitions.Clear();
@@ -78,7 +106,7 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
         // Gün başlıkları
-        AddCell(0, 0, HeaderCell(""));
+        AddCell(0, 0, OrientationToggleCell());
         for (var c = 0; c < WorkDays.Length; c++)
             AddCell(0, c + 1, HeaderCell(Turkish.DateTimeFormat.GetDayName(WorkDays[c]).ToUpper(Turkish)));
 
@@ -116,7 +144,7 @@ public partial class DutyRosterView : UserControl, IReloadablePage, IEmbeddableC
             MatrixGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
         // Nöbet yeri başlıkları + Müdür Yrd
-        AddCell(0, 0, HeaderCell(""));
+        AddCell(0, 0, OrientationToggleCell());
         for (var f = 0; f < DutyRosterDay.DefaultFloors.Length; f++)
             AddCell(0, f + 1, HeaderCell(DutyRosterDay.DefaultFloors[f].ToUpper(Turkish)));
         AddCell(0, DutyRosterDay.DefaultFloors.Length + 1, HeaderCell("👑 NÖBETÇİ MD. YRD."));
