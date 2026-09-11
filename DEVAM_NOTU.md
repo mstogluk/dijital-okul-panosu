@@ -2457,3 +2457,56 @@ dönük bir ihtiyaç. Şimdilik kodlanmadı, sadece tasarım taslağı burada du
 - **Bu okulda acil değil, sadece BAŞKA bir okula bu yazılım verilirken gündeme gelecek** — o zaman kullanıcı
   hangi okulun bu ihtiyacı olduğunu söyleyecek, tasarımı o okulun gerçek düzenine göre netleştirip
   kodlamak daha sağlıklı olur (şimdiden varsayımla kodlamak yanlış tahmin riski taşır).
+
+## 2026-09-11 (devam) — Nöbet Çizelgesi'nde arama denemesi geri alındı, gerçek veriyle ikinci tur düzeltme
+
+**Arama kutusu deneyi başarısız oldu, sadeliğe dönüldü:** Önceki turda eklenen `SearchableNameCombo`
+(ayrı arama TextBox'ı + ComboBox ikilisi) hem gerçek bir görüntü hatası içeriyordu (seçim sonrası kutucukta
+isim GÖRÜNMÜYORDU — veri doğru kaydediliyordu ama `ItemsSource` sıfırlanınca WPF görünen Text'i boşaltıyordu)
+hem de kullanıcıyı yordu ("herşey karıştı, hiç sevmedim" — özellikle "+ Öğretmen ekle" için önce butona
+basıp SONRA aramak gerekmesi ekstra bir adımdı). **Kesin karar: tek, sade bir `ComboBox`'a (`NameCombo`)
+dönüldü, arama kutusu/katlanır buton TAMAMEN kaldırıldı.** Bunun yerine WPF'in **yerleşik "yazarak atlama"**
+özelliği (ComboBox odaktayken bir harfe basınca o harfle başlayan ilk öğeye atlar — `IsTextSearchEnabled`,
+varsayılan açık, önceki turda BİLEREK kapatılmıştı) olduğu gibi bırakıldı; bu, uygulamanın özel ComboBox
+şablonuyla da sorunsuz çalışıyor (`IsEditable` gerektirmiyor — önceki `IsEditable` denemesinin PART_
+EditableTextBox eksikliği yüzünden neden çalışmadığı da böylece anlaşıldı). Özelliğin görünür bir arama
+kutusu olmadığı için keşfedilmesi zor olacağından: sayfanın üstüne kalıcı bir ipucu satırı + her seçicide
+üzerine gelince çıkan bir ToolTip eklendi.
+
+**Yön Değiştir butonu matrisin sol-üst köşesine taşındı ve kalıcı hâle getirildi:** Kullanıcı, ayrı bir
+üst-buton yerine tam köşe hücresinde olmasını istedi (`OrientationToggleCell` — kırmızımsı, tıklanabilir
+bir `Border`). Ayrıca son seçilen yön artık `LocalSettings.DutyRosterDaysAsRows` ile makineye özel kalıcı
+hâle getirildi — sayfa her açıldığında sıfırlanmıyor.
+
+**Gerçek Excel verisiyle test edilince yapıştırma PARSER'ının eksik yönü ortaya çıktı — düzeltildi:**
+Kullanıcının Excel'e döktüğü format, önceki turda desteklenen (satır=gün/sütun=nöbet yeri, PDF'in doğal
+yönü) yerine TAM TERSİ (satır=nöbet yeri/sütun=gün, bizim panomuzun varsayılan görünümüyle AYNI yön) çıktı
+— üstelik aynı yer (ör. "BAHÇE") birden fazla kişi olduğunda birden fazla SATIRDA tekrarlanıyordu, tek
+hücrede Alt+Enter değil. Eski kod sadece tek yönü tanıdığı için "Sütun başlıkları tanınamadı" hatası
+veriyordu. **Düzeltme:** `ApplyPaste_Click` artık başlık satırındaki hücrelerin gün adı mı yoksa nöbet
+yeri/Müdür Yrd. adı mı olduğunu SAYARAK yönü otomatik tespit ediyor, iki ayrı metoda (`ApplyPasteFloorColumns`
+/ `ApplyPasteDayColumns`) yönlendiriyor — kullanıcının hangi yönde yapıştırdığını bilmesine gerek yok.
+Aynı yerin birden fazla satırda tekrarlanması için (gün,yer) bazında "temizlendi mi" takibi eklendi (`clearedFloors`
+HashSet) — yoksa ikinci satır ilkini silerdi. "-" gibi boş yer tutucular artık isim gibi eklenmeye
+çalışılmıyor (`IsEmptyPlaceholder`). **Kullanıcı üç format arasından hangisinin en mantıklı olduğunu
+sordu (Alt+Enter / "öğrt1,öğrt2" / tekrarlı satır) — Alt+Enter (ya da virgül) önerildi, en kompakt ve
+zaten en sağlam desteklenen yöntem; tekrarlı satır da (kullanıcının fiilen kullandığı) sorunsuz çalışıyor,
+sadece "/" ayracı henüz desteklenmiyor (istenirse eklenir).**
+
+**Hata mesajları artık popup pencere:** Kullanıcı, "Sütun başlıkları tanınamadı" gibi hataların sayfanın
+üstündeki soluk durum yazısında kaybolduğunu, hatayı bulana kadar yorulduğunu bildirdi. Tüm yapıştırma
+hataları artık `AppMessageBox.Show` ile dikkat çekici bir uyarı penceresi olarak gösteriliyor
+(`ShowPasteError`) — sessiz `StatusText` sadece BAŞARI özetinde kullanılmaya devam ediyor.
+
+**Görsel kontrast düzeltmesi:** Atanmış öğretmen çipleri ile boş "+ Öğretmen ekle" kutusu aynı parlaklıkta
+(`TextPrimaryBrush`) çizildiği için tabloya bakınca kimin nerede görevli olduğu göze çarpmıyordu. "+ Öğretmen
+ekle" artık hep soluk (`TextMutedBrush`); Müdür Yrd. seçicisi de "— Seçiniz —" gösterirken soluk, bir isim
+seçilince parlak oluyor.
+
+**Ders — WPF ComboBox'ta `Foreground` neden bu sefer ÇALIŞTI (önceki `Background` fiyaskolarının aksine):**
+`Base.xaml`'deki özel ComboBox şablonu, seçili öğeyi gösteren `ContentPresenter`'a Foreground'u AÇIKÇA
+TemplateBinding etmiyor — ama `Foreground` WPF'te MİRASLI (inherited) bir özellik olduğu için, ComboBox'ın
+kendi `Foreground`'u (Style'ın tepesindeki Setter ile `TextPrimaryBrush`) görsel ağaçtaki `ContentPresenter`'a
+otomatik akıyor. Kod içinden `combo.Foreground = ...` atamak bu yüzden sorunsuz çalıştı — `Background` (miras
+almayan bir özellik) için aynı numaranın işe yaramamasının (bkz. UserControl/GridSplitter/ListBox'taki eski
+hatalar) tam nedeni bu ayrım.
